@@ -14,10 +14,15 @@ class Animal(position: Vector2d, direction: MapDirection = MapDirection.NORTH, l
 
     /**
      * Value that represents how many day the animal has left to live
-     *
+     * You can add to life whatever you want, but if u want to deduct life only 1 lower will pass
      */
     var life: Int = life
         set(newValue) {
+            if (newValue > field) {
+                field = newValue
+                return
+            }
+
             if(field - 1 != newValue) return
             field = newValue
         }
