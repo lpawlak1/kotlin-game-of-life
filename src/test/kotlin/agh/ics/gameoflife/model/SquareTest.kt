@@ -27,7 +27,7 @@ internal class SquareTest {
         val animal_1 = Animal(Vector2d(1,3),MapDirection.NORTH, life = 1)
         assertTrue(square.place(animal_1))
 
-        square.changeDay()
+        square.changeDay(1)
         assertEquals(animal_1.life, 0)
         assertEquals(animal_1.lifeSpan, 1)
 
@@ -36,7 +36,7 @@ internal class SquareTest {
         assertTrue(square.place(animal_2))
 
 
-        square.changeDay()
+        square.changeDay(1)
 
         assertEquals(animal_1.life, -1)
         assertEquals(animal_1.lifeSpan, 2)
@@ -48,7 +48,7 @@ internal class SquareTest {
         val animal_3 = Animal(Vector2d(1,3),MapDirection.NORTH_EAST, life = 3)
         assertTrue(square.place(animal_3))
 
-        square.changeDay()
+        square.changeDay(1)
         assertEquals(animal_1.life, -2)
         assertEquals(animal_1.lifeSpan, 3)
 
@@ -68,7 +68,7 @@ internal class SquareTest {
         val animal_1 = Animal(Vector2d(1,3),MapDirection.NORTH, life = 1)
         assertTrue(square.place(animal_1))
 
-        square.changeDay()
+        square.changeDay(1)
 
         square.removeDead()
         assertEquals(square.animals.size, 0)
@@ -78,10 +78,10 @@ internal class SquareTest {
         assertTrue(square.place(animal_2))
 
         assertEquals(square.animals.size, 1)
-        square.changeDay()
+        square.changeDay(1)
         square.removeDead()
         assertEquals(square.animals.size, 1)
-        square.changeDay()
+        square.changeDay(1)
         assertEquals(square.animals.size, 1)
 
         square.removeDead()
@@ -93,15 +93,15 @@ internal class SquareTest {
         val animal_3_2 = Animal(Vector2d(1,3),MapDirection.NORTH_EAST, life = 3)
         assertTrue(square.place(animal_3_2))
 
-        square.changeDay()
+        square.changeDay(1)
         square.removeDead()
         assertEquals(square.animals.size, 2)
 
-        square.changeDay()
+        square.changeDay(1)
         square.removeDead()
         assertEquals(square.animals.size, 2)
 
-        square.changeDay()
+        square.changeDay(1)
         assertEquals(square.animals.size, 2)
         square.removeDead()
 

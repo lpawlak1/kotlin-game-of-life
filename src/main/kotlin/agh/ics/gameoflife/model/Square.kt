@@ -22,9 +22,10 @@ class Square(val position: Vector2d){
      * Before anything in simulation we have to add 1 to their [Animal.lifeSpan]
      * and [Animal.life] should be deducted by 1
      */
-    fun changeDay() {
+    fun changeDay(moveEnergy: Int) {
         for (animal in animals) {
-            animal.life = animal.life - 1
+            animal.deduceDayLife(moveEnergy)
+//            animal.life = animal.life - 1
             animal.lifeSpan = animal.lifeSpan + 1
         }
     }
@@ -42,11 +43,10 @@ class Square(val position: Vector2d){
      */
     fun move(currentIteration: Int): List<Animal> {
         val list = animals.filter { it.lastMove != currentIteration }
-        for(animal in list){
-            animal.move()
-        }
         animals.removeIf { it.lastMove != currentIteration }
-        list.forEach{ it.move() } // Loop thru them and move each
+        for(animal in list){
+            animal.move(currentIteration)
+        }
         return list
     }
 
@@ -68,14 +68,15 @@ class Square(val position: Vector2d){
 
     /**
      * Breeds new animal from 2 biggest animals
-     * @return newborn and caller should handle the positioning
+     * caller should handle the positioning of return value
+     * @return newborn
      */
     fun breed(): Animal? {
         if (animals.size >= 2) {
             val first: Animal = this.pollBiggestAnimal()!!
             val second: Animal = this.pollBiggestAnimal()!!
 
-            val newAnimal: Animal = first.breed(second)
+            val newAnimal: Animal = Animal.breed(first,second)
             place(second)
             place(first)
             return newAnimal

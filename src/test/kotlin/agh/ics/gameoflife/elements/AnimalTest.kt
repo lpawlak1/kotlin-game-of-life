@@ -20,7 +20,7 @@ internal class AnimalTest {
         val alfa = Animal(Vector2d(1,1), life=10)
         assert(alfa.life == 10)
         assert(alfa.life != 4)
-        alfa.life -= 1
+        alfa.deduceDayLife(1)
         assert(alfa.life == 9)
     }
 
