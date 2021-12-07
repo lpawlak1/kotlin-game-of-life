@@ -3,24 +3,23 @@ package agh.ics.gameoflife.model
 import agh.ics.gameoflife.position.Vector2d
 import agh.ics.gameoflife.elements.Animal
 import agh.ics.gameoflife.elements.Grass
-import kotlin.Comparator
 
 class Square(val position: Vector2d){
     /**
      * It is main container for all [Animal] in Square
-     * Animals are sorted by their [Animal.life] left, the smallest [Animal.life] first
+     * Animals are sorted by their [Animal.energy] left, the smallest [Animal.energy] first
      */
-    internal val animals : MutableList<Animal> = mutableListOf()
+    internal var animals : MutableList<Animal> = mutableListOf()
 
     /**
      * As only one [Grass] can be in Square just one mutable field is enough
      * It can be nullable
      */
-    private var grass: Grass? = null
+    public var grass: Grass? = null
 
     /**
      * Before anything in simulation we have to add 1 to their [Animal.lifeSpan]
-     * and [Animal.life] should be deducted by 1
+     * and [Animal.energy] should be deducted by 1
      */
     fun changeDay(moveEnergy: Int) {
         for (animal in animals) {
@@ -34,7 +33,7 @@ class Square(val position: Vector2d){
      * Removes every dead [Animal] from square
      */
     fun removeDead() {
-        animals.removeIf { it.life <= 0 }
+        animals.removeIf { it.energy <= 0 }
     }
 
     /**
@@ -42,12 +41,9 @@ class Square(val position: Vector2d){
      * @return List of animals that have moved, not all as some might be here because they already moved in this day
      */
     fun move(currentIteration: Int): List<Animal> {
-        val list = animals.filter { it.lastMove != currentIteration }
-        animals.removeIf { it.lastMove != currentIteration }
-        for(animal in list){
-            animal.move(currentIteration)
-        }
-        return list
+        val (math,rest) = animals.partition { it.move(currentIteration) }
+        this.animals = rest as MutableList<Animal>
+        return math
     }
 
     /**
@@ -57,8 +53,8 @@ class Square(val position: Vector2d){
     fun eat(eatValue: Int) {
         if (grass != null && animals.size != 0) {
             val anim: Animal = this.biggestAnimal()!!
-            val list: List<Animal> = this.animals.filter{ it.life == anim.life }
-            val dividedEnergy: Int = eatValue / list.size
+            val list: List<Animal> = this.animals.filter{ it.energy == anim.energy }
+            val dividedEnergy: Int = (eatValue / list.size).toInt()
             for(animal in list){
                 animal.eat(dividedEnergy)
             }
@@ -68,20 +64,26 @@ class Square(val position: Vector2d){
 
     /**
      * Breeds new animal from 2 biggest animals
-     * caller should handle the positioning of return value
-     * @return newborn
+     * @return true if animal was successfully breeded
      */
-    fun breed(): Animal? {
+    fun breed(min_life_required: Int): Boolean {
         if (animals.size >= 2) {
             val first: Animal = this.pollBiggestAnimal()!!
             val second: Animal = this.pollBiggestAnimal()!!
 
+            if (second.energy < min_life_required || first.energy < min_life_required){
+                place(second)
+                place(first)
+                return false
+            }
+
             val newAnimal: Animal = Animal.breed(first,second)
             place(second)
             place(first)
-            return newAnimal
+            place(newAnimal)
+            return true
         }
-        return null
+        return false
     }
 
     /**
@@ -89,8 +91,6 @@ class Square(val position: Vector2d){
      * @param animal [Animal] to be put into square
      */
     fun place(animal: Animal) : Boolean {
-//        if (animals.size == 0 || animals.last()!!.life >= animal.life)
-//            return false
         animals.add(animal)
         return true
     }
@@ -112,17 +112,22 @@ class Square(val position: Vector2d){
      * @return [Animal] or null if none animals are present
      */
     fun biggestAnimal(): Animal? {
-        return animals.last()
+        return animals.maxWithOrNull(compareBy {it.energy})
     }
 
     /**
      * Get animal with the most life points, and removes it
-     * @return [Animal] or null if none animals are present
+     * @return [Animal] or throws [Exception] if no animals in list
      */
-    fun pollBiggestAnimal(): Animal? {
-        val ret = this.biggestAnimal() ?: return null
-        this.animals.remove(ret)
+    fun pollBiggestAnimal(): Animal {
+        val ret: Animal = this.biggestAnimal()!!
+        this.animals.removeIf{ret === it}
         return ret
+    }
+
+    override fun toString(): String {
+        return (this.biggestAnimal()?:
+               this.grass?:"").toString()
     }
 
     /**
@@ -131,6 +136,7 @@ class Square(val position: Vector2d){
      */
     val isOcuppied: Boolean
         get() = animals.size != 0 || grass != null
+
 
 
 }

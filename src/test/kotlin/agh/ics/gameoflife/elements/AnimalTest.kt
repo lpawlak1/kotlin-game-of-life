@@ -4,24 +4,22 @@ import agh.ics.gameoflife.position.MapDirection
 import agh.ics.gameoflife.position.Vector2d
 import org.junit.jupiter.api.Test
 
-import org.junit.jupiter.api.Assertions.*
-
 internal class AnimalTest {
 
     @Test
     fun getLife() {
         val alfa = Animal(Vector2d(1,1), life=0)
-        assert(alfa.life == 0)
-        assert(alfa.life != 9)
+        assert(alfa.energy == 0)
+        assert(alfa.energy != 9)
     }
 
     @Test
     fun setLife() {
         val alfa = Animal(Vector2d(1,1), life=10)
-        assert(alfa.life == 10)
-        assert(alfa.life != 4)
+        assert(alfa.energy == 10)
+        assert(alfa.energy != 4)
         alfa.deduceDayLife(1)
-        assert(alfa.life == 9)
+        assert(alfa.energy == 9)
     }
 
     @Test

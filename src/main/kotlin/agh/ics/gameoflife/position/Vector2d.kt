@@ -1,6 +1,5 @@
 package agh.ics.gameoflife.position
 
-import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -22,13 +21,4 @@ data class Vector2d(val x: Int, val y: Int) {
 
     operator fun minus(other: Vector2d): Vector2d = Vector2d(x - other.x, y - other.y)
 
-    fun otoczka() = makeOtoczka(this)
-}
-
-fun makeOtoczka(pos: Vector2d): List<Vector2d>{
-    var vec = mutableListOf<Vector2d>()
-    for (i in 0..7) {
-        vec.add(pos + MapDirection.NORTH.next(i).toUnitVector())
-    }
-    return vec
 }

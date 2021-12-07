@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import kotlin.test.*
 
 internal class Vector2dTest {
 
@@ -13,20 +12,6 @@ internal class Vector2dTest {
         assertEquals(Vector2d(-2,-2),vector_2_2.opposite())
         assertEquals(Vector2d(-1,-2),vector_1_2.opposite())
     }
-
-    @Test
-    fun otoczka() {
-        assertEquals(listOf(
-            Vector2d(2,3),
-            Vector2d(3,3),
-            Vector2d(3,2),
-            Vector2d(3,1),
-            Vector2d(2,1),
-            Vector2d(1,1),
-            Vector2d(1,2),
-            Vector2d(1,3)), vector_2_2.otoczka())
-    }
-
 
     lateinit var vector_2_2: Vector2d
     lateinit var vector_2_2a: Vector2d

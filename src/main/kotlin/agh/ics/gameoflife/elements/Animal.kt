@@ -1,5 +1,6 @@
 package agh.ics.gameoflife.elements
 
+import agh.ics.gameoflife.map.AbstractorWorldMap
 import agh.ics.gameoflife.position.MapDirection
 import agh.ics.gameoflife.position.Vector2d
 import java.util.*
@@ -10,7 +11,8 @@ import kotlin.random.Random
 class Animal(position: Vector2d,
              direction: MapDirection = MapDirection.NORTH,
              life: Int,
-             genes: Array<Int> = Array(32){0}
+             genes: Array<Int> = Array(32){0},
+             public var map: AbstractorWorldMap? = null
     ) : AbstractElement(position) {
 
     /**
@@ -24,22 +26,22 @@ class Animal(position: Vector2d,
      * Use public methods to change this property, namely [Animal.deduceDayLife], [Animal.eat],
      * also will change on [Animal.getChildEnergy]
      */
-    var life: Int = life
+    var energy: Int = life
         private set
 
     /**
      * Deduces one life day from life of animal
      */
     public fun deduceDayLife(moveEnergy: Int){
-        this.life -= moveEnergy
+        this.energy -= moveEnergy
     }
 
     /**
-     * Adds [grassLife] to the total [life] of animal,
+     * Adds [grassLife] to the total [energy] of animal,
      * making animal eat this grass
      */
     public fun eat(grassLife: Int) {
-        this.life += grassLife
+        this.energy += grassLife
     }
 
 
@@ -59,7 +61,7 @@ class Animal(position: Vector2d,
     /**
      * Genes of animal, based on parents genes
      */
-    private var genes: Array<Int> = genes
+    public val genes: Array<Int> = genes
 
 
 
@@ -83,38 +85,65 @@ class Animal(position: Vector2d,
 
         val no_of_rotate = genes[Random.nextInt(genes.size)]
 
-        this.direction.next(no_of_rotate)
-
         when(no_of_rotate) {
             0 -> {
-                this.position = this.position + this.direction.toUnitVector()
-                return true
+                val value = map?.translateVector(this.position + this.direction.toUnitVector())
+                if(value is Pair<Vector2d, Boolean>) {
+                    val (position, moved) = value
+                    if (moved) {
+                        this.position = position
+                        return true
+                    }
+                }else{
+                    this.position = this.position + this.direction.toUnitVector()
+                    return true
+                }
             }
             4 -> {
-                this.position = this.position + this.direction.toUnitVector().opposite()
-                return true
+                val value = map?.translateVector(this.position - this.direction.toUnitVector())
+                if(value is Pair<Vector2d, Boolean>) {
+                    val (position, moved) = value
+                    if (moved) {
+                        this.position = position
+                        return true
+                    }
+                }else{
+                    this.position = this.position + this.direction.toUnitVector().opposite()
+                    return true
+                }
+            }
+            else -> {
+                this.direction.next(no_of_rotate)
             }
         }
         return false
     }
 
     /**
-     * Gets energy that is for child, deducing it from current [Animal.life]
+     * Gets energy that is for child, deducing it from current [Animal.energy]
      *
      * Returns energy for its child
      */
-    private fun getChildEnergy(): Int{
-        val energy: Int = (this.life*0.25).toInt()
-        this.life -= energy
+    private fun getChildEnergy(): Double{
+        val energy = (this.energy*0.25)
+        this.energy -= energy.toInt()
         return energy
     }
 
 
     companion object {
+        public fun getRandomGenes(): Array<Int>{
+            val arr = Array<Int>(32){0}
+            for (i in 1..32){
+                arr[i-1] = Random.nextInt(7)
+            }
+            arr.sort()
+            return arr
+        }
         public fun breed(first:Animal, second:Animal): Animal{
             //Perform amazing operations to breed
             val genes = getGenesFromParents(first, second)
-            val child_energy = first.getChildEnergy() + second.getChildEnergy()
+            val child_energy = (first.getChildEnergy() + second.getChildEnergy()).toInt()
             val child_position = first.position
 
             return Animal(child_position,
@@ -125,16 +154,30 @@ class Animal(position: Vector2d,
         internal fun getGenesFromParents(parent1: Animal, parent2: Animal): Array<Int> {
             val childGenes = Array(32){ 0 }
 
-            val suma = parent1.life + parent2.life
+            val suma = parent1.energy + parent2.energy
 
-            val prec1: Int = round((parent1.life/suma).toDouble()).toInt()
+            val prec1: Int = round((32*(parent1.energy).toDouble())/suma).toInt()
 
-            for (i in 0 until prec1){
-                childGenes[i] = parent1.genes[i]
+            val rng_kto: Boolean = Random.Default.nextInt(0,2) == 1
+
+            if (rng_kto){
+                for (i in 0 until prec1){
+                    childGenes[i] = parent1.genes[i]
+                }
+
+                for (i in prec1 until 32){
+                    childGenes[i] = parent2.genes[i]
+                }
             }
+            else {
+                for (i in 0 until prec1){
+                    childGenes[i] = parent2.genes[i]
+                }
 
-            for (i in prec1..32){
-                childGenes[i] = parent2.genes[i]
+                for (i in prec1 until 32){
+                    childGenes[i] = parent1.genes[i]
+                }
+
             }
 
             Arrays.sort(childGenes)

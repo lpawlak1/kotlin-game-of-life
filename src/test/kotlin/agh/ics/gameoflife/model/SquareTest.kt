@@ -28,7 +28,7 @@ internal class SquareTest {
         assertTrue(square.place(animal_1))
 
         square.changeDay(1)
-        assertEquals(animal_1.life, 0)
+        assertEquals(animal_1.energy, 0)
         assertEquals(animal_1.lifeSpan, 1)
 
 
@@ -38,10 +38,10 @@ internal class SquareTest {
 
         square.changeDay(1)
 
-        assertEquals(animal_1.life, -1)
+        assertEquals(animal_1.energy, -1)
         assertEquals(animal_1.lifeSpan, 2)
 
-        assertEquals(animal_2.life, 1)
+        assertEquals(animal_2.energy, 1)
         assertEquals(animal_2.lifeSpan, 1)
 
 
@@ -49,13 +49,13 @@ internal class SquareTest {
         assertTrue(square.place(animal_3))
 
         square.changeDay(1)
-        assertEquals(animal_1.life, -2)
+        assertEquals(animal_1.energy, -2)
         assertEquals(animal_1.lifeSpan, 3)
 
-        assertEquals(animal_2.life, 0)
+        assertEquals(animal_2.energy, 0)
         assertEquals(animal_2.lifeSpan, 2)
 
-        assertEquals(animal_3.life, 2)
+        assertEquals(animal_3.energy, 2)
         assertEquals(animal_3.lifeSpan, 1)
 
     }
@@ -118,7 +118,7 @@ internal class SquareTest {
 
         assertFalse(square.placeGrass())
         square.eat(2)
-        assertTrue(animal_1.life == 12)
+        assertTrue(animal_1.energy == 12)
 
         val animal_2 =Animal(Vector2d(1,3),direction = MapDirection.NORTH, life = 12)
 
@@ -127,8 +127,8 @@ internal class SquareTest {
 
         square.eat(2)
         assertTrue(square.animals.size == 2)
-        assertEquals(animal_1.life, 13)
-        assertEquals(animal_2.life, 13)
+        assertEquals(animal_1.energy, 13)
+        assertEquals(animal_2.energy, 13)
     }
 
     @Test
@@ -191,10 +191,29 @@ internal class SquareTest {
 
     @Test
     fun breed() {
+        val square: Square = Square(Vector2d(1,3))
+        square.place(Animal(Vector2d(1,3), life = 50, genes=Array(32){0}))
+        square.place(Animal(Vector2d(1,3), life = 150, genes=Array(32){4}))
+        square.breed(40)
+        val parent_a = square.pollBiggestAnimal()!!
+        assertEquals(parent_a.energy, (150- (150*0.25).toInt()).toInt())
+        val child = square.pollBiggestAnimal()!!
+        assertEquals(50, child.energy)
+        val parent_b = square.pollBiggestAnimal()!!
+        assertEquals(parent_b.energy, (50- (50*0.25).toInt()))
     }
 
     @Test
     fun move() {
+        val square: Square = Square(Vector2d(1,3))
+        square.place(Animal(Vector2d(1,3), life = 10))
+        square.place(Animal(Vector2d(1,3), life = 10, genes=Array(32){4}))
+        square.place(Animal(Vector2d(1,3), life = 10, genes=Array(32){7}))
+        square.place(Animal(Vector2d(1,3), life = 10, genes=Array(32){3}))
+
+        val animals = square.move(10)
+        assertEquals(2, animals.size) // The first 2 will move
+
     }
 
 }
