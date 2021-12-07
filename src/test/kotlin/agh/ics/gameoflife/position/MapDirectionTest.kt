@@ -7,19 +7,6 @@ import org.junit.jupiter.api.Assertions.*
 internal class MapDirectionTest {
 
     @Test
-    fun testToString() {
-        assert(MapDirection.NORTH.toString() == "NN")
-        assert(MapDirection.NORTH_EAST.toString() == "NE")
-        assert(MapDirection.EAST.toString() == "EE")
-        assert(MapDirection.SOUTH_EAST.toString() == "SE")
-        assert(MapDirection.SOUTH.toString() == "SS")
-        assert(MapDirection.SOUTH_WEST.toString() == "SW")
-        assert(MapDirection.WEST.toString() == "WW")
-        assert(MapDirection.NORTH_WEST.toString() == "NW")
-        assert(MapDirection.NORTH.toString() == "NN")
-    }
-
-    @Test
     operator fun next() {
         assert(MapDirection.NORTH.next(1) == MapDirection.NORTH_EAST)
         assert(MapDirection.NORTH_EAST.next(1) == MapDirection.EAST)
