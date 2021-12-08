@@ -1,6 +1,6 @@
 package agh.ics.gameoflife.elements
 
-import agh.ics.gameoflife.map.AbstractWorldMap
+import agh.ics.gameoflife.map.IWorldMap
 import agh.ics.gameoflife.position.MapDirection
 import agh.ics.gameoflife.position.Vector2d
 import java.util.*
@@ -20,7 +20,7 @@ class Animal(
      * Represents map that animal is being put to, needed for move with constraints like [agh.ics.gameoflife.map.WallWorldMap] or [agh.ics.gameoflife.map.WrappedWorldMap]
      * Can be null, then none of these constraints will be used to block Animal from moving in any direction
      */
-    var map: AbstractWorldMap? = null
+    var map: IWorldMap? = null
 ) : AbstractElement(position) {
 
     /**
@@ -151,7 +151,8 @@ class Animal(
                 childPosition,
                 MapDirection.directionFactory(Random.Default.nextInt(8)),
                 childEnergy,
-                genes
+                genes,
+                first.map
             )
         }
 

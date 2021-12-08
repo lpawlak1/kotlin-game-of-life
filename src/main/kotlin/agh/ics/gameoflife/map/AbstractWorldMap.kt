@@ -27,7 +27,8 @@ internal fun HashMap<Vector2d, Square>.removeNullSquares() {
     }
 }
 
-abstract class AbstractWorldMap(animals: List<Animal>, private val jungle: Jungle, val width: Int, val height: Int) : IWorldMap {
+abstract class AbstractWorldMap(animals: List<Animal>, private val jungle: Jungle, val width: Int, val height: Int) :
+    IWorldMap {
     private val steppe: Stepee
     private val objectsMap: HashMap<Vector2d, Square> = hashMapOf()
 
@@ -85,7 +86,7 @@ abstract class AbstractWorldMap(animals: List<Animal>, private val jungle: Jungl
     }
 
     override fun addAnimals(animals: List<Animal>) {
-        with(this.objectsMap){
+        with(this.objectsMap) {
             animals.forEach { getEverytime(it.position).place(it) }
         }
     }
@@ -120,8 +121,6 @@ abstract class AbstractWorldMap(animals: List<Animal>, private val jungle: Jungl
 
     override fun getViewObj(position: Vector2d): MutableState<String> {
         return this.mutableStates[position.x][position.y]
-//        return ((this.objectsMap.get(position)?.biggestAnimal() ?: this.objectsMap.get(position)?.grass
-//        ?: "").toString())
     }
 }
 

@@ -18,16 +18,14 @@ class WrappedWorldMap(
 
     override fun translateVector(position: Vector2d): Pair<Vector2d, Boolean> {
         var (x, y) = position
-        if (position.x > width) {
+        if (x > width) {
             x = 0
-        }
-        if (position.y > height) {
-            y = 0
-        }
-        if (position.x < 0) {
+        } else if (x < 0) {
             x = width
         }
-        if (position.y < 0) {
+        if (y > height) {
+            y = 0
+        } else if (y < 0) {
             y = height
         }
         val moved = (position == Vector2d(x, y))

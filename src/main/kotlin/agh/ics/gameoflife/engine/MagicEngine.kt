@@ -7,11 +7,13 @@ const val initialLife: Int = 100
 /**
  * Extension of [PlainEngine], can rescue simulation by adding random Animals
  */
-class MagicEngine(map: IWorldMap,
-                  /**
-                   * How many times simulation should be rescued by adding 5 [agh.ics.gameoflife.elements.Animal]
-                   */
-                  val rescueTimes: Int) : PlainEngine(map) {
+class MagicEngine(
+    map: IWorldMap,
+    /**
+     * How many times simulation should be rescued by adding 5 [agh.ics.gameoflife.elements.Animal]
+     */
+    val rescueTimes: Int
+) : PlainEngine(map) {
     private var counter: Int = 0
 
     override fun runIteration() {

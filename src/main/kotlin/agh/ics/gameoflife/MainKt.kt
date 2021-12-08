@@ -10,6 +10,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.material.Button
@@ -19,6 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
@@ -26,6 +30,7 @@ import androidx.compose.ui.window.rememberWindowState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.lang.Thread.sleep
 
 fun prepareEngine(size: Int): IEngine {
@@ -49,15 +54,15 @@ fun runSimulation(running: MutableState<Boolean>, time: Int, engine: IEngine) {
 @OptIn(ExperimentalFoundationApi::class)
 @Preview
 @Composable
-fun essa2() {
+fun getMainView(running: MutableState<Boolean>) {
     val size = 30
     val engine = prepareEngine(size)
-    val running: MutableState<Boolean> = mutableStateOf(false)
     sleep(2000)
     CoroutineScope(Dispatchers.Default).launch {
         runSimulation(running, 200, engine)
     }
 
+    val img = painterResource("animal.png")
     MaterialTheme {
         Row {
             Column {
@@ -71,16 +76,14 @@ fun essa2() {
                     Text("${if (running.value) stop else start} simulation")
                 }
 
-//                val test: MainGrid =
-//                    MainGrid(WallWorldMap(emptyList(), Jungle(Vector2d(0, 0), Vector2d(1, 10)), 20, 20))
-//                test.getView()
             }
-            Column {
+            Column(modifier = Modifier.size(((size + 1) * 20).dp)) {
+                val siz2 = size + 1
                 Text("essa")
-                LazyVerticalGrid(cells = GridCells.Fixed(size)) {
-                    items(size * size) {
-                        val x = it / size
-                        val y = it % size
+                LazyVerticalGrid(cells = GridCells.Fixed(siz2)) {
+                    items(siz2 * siz2) {
+                        val x = it / siz2
+                        val y = it % siz2
                         val a = GridCell(
                             engine.map.getViewObj(Vector2d(x, y)),
                             engine.map,
@@ -88,7 +91,7 @@ fun essa2() {
                             y,
                             engine.map.returnBackGroundColor(Vector2d(x, y))
                         )
-                        a.getView()
+                        a.getView(img)
                     }
                 }
             }
@@ -97,15 +100,22 @@ fun essa2() {
 }
 
 fun main() {
+    lateinit var running: MutableState<Boolean>
+    runBlocking {
+        CoroutineScope(Dispatchers.Default).launch {
+            running = mutableStateOf(false)
+        }.join()
+    }
+
     application {
         Window(
             onCloseRequest = ::exitApplication,
             title = "Simulation",
             state = rememberWindowState(
                 position = WindowPosition(alignment = Alignment.Center),
-            ),
+            )
         ) {
-            essa2()
+            getMainView(running)
         }
 
     }
