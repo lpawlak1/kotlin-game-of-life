@@ -1,6 +1,7 @@
 package agh.ics.gameoflife.regions
 
 import agh.ics.gameoflife.position.Vector2d
+import androidx.compose.ui.graphics.Color
 import kotlin.random.Random
 
 class Stepee(
@@ -18,12 +19,16 @@ class Stepee(
     override fun getRandomVector(): Vector2d {
         lateinit var rngVector: Vector2d
         do {
-            var x = Random.nextInt(externalLowerLeft.x, externalUpperRight.x)
-            var y = Random.nextInt(externalLowerLeft.y, externalUpperRight.y)
+            val x = Random.nextInt(externalLowerLeft.x, externalUpperRight.x)
+            val y = Random.nextInt(externalLowerLeft.y, externalUpperRight.y)
             rngVector = Vector2d(x, y)
 
         } while (!this.isIn(rngVector))
 
         return rngVector
+    }
+
+    override fun retColor(): Color {
+        return Color(157, 66, 21, 255)
     }
 }

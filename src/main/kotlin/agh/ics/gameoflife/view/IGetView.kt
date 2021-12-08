@@ -6,5 +6,5 @@ import androidx.compose.runtime.MutableState
 
 interface IGetView {
 
-    public fun getViewObj(position: Vector2d) : MutableState<String>
+    fun getViewObj(position: Vector2d): MutableState<String>
 }

@@ -12,9 +12,11 @@ abstract class AbstractElement(position: Vector2d) {
      * Position of Element in Map -> type: [Vector2d]
      * Public getter and private setter
      */
-    public var position: Vector2d = position
+    var position: Vector2d = position
         protected set
 
-    override fun equals(other: Any?): Boolean = (this === other) || (other is AbstractElement && position == other.position)
+    override fun equals(other: Any?): Boolean =
+        (this === other) || (other is AbstractElement && position == other.position)
+
     override fun hashCode(): Int = position.hashCode()
 }

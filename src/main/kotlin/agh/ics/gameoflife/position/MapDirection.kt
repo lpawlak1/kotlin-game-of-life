@@ -5,7 +5,7 @@ enum class MapDirection(val `val`: Int, private val rName: String, private val x
     NORTH_EAST(1, "↗", 1, 1),
     EAST(2, "→", 1, 0),
     SOUTH_EAST(3, "↘", 1, -1),
-    SOUTH(4,"↓",0,-1),
+    SOUTH(4, "↓", 0, -1),
     SOUTH_WEST(5, "↙", -1, -1),
     WEST(6, "←", -1, 0),
     NORTH_WEST(7, "↖", -1, 1);

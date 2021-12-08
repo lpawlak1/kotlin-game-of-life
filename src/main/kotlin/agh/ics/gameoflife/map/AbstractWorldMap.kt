@@ -9,11 +9,12 @@ import agh.ics.gameoflife.regions.Jungle
 import agh.ics.gameoflife.regions.Stepee
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
 import kotlin.random.Random
 
-val moveEnergy = 4
-val eatValue = 10
-val breedMinValue = 20
+const val moveEnergy = 4
+const val eatValue = 50
+const val breedMinValue = 20
 
 internal fun HashMap<Vector2d, Square>.getEverytime(vec: Vector2d): Square {
     this.putIfAbsent(vec, Square(vec))
@@ -21,23 +22,34 @@ internal fun HashMap<Vector2d, Square>.getEverytime(vec: Vector2d): Square {
 }
 
 internal fun HashMap<Vector2d, Square>.removeNullSquares() {
-    for (elem in this.filter { !it.value.isOcuppied }) {
+    for (elem in this.filter { !it.value.isOccupied }) {
         this.remove(elem.key)
     }
 }
 
-abstract class AbstractorWorldMap(animals: List<Animal>, jungle: Jungle, val width: Int, val height: Int) : IWorldMap {
-    private val jungle: Jungle = jungle
-    private val stepee: Stepee
+abstract class AbstractWorldMap(animals: List<Animal>, private val jungle: Jungle, val width: Int, val height: Int) : IWorldMap {
+    private val steppe: Stepee
     private val objectsMap: HashMap<Vector2d, Square> = hashMapOf()
 
-    val mutableStates = Array(width) { Array(height) { mutableStateOf<String>("") } }
+    val mutableStates = Array(width + 1) { Array(height + 1) { mutableStateOf("") } }
 
     init {
-        stepee = Stepee(Vector2d(0, 0), Vector2d(width, height), jungle.lowerLeft, jungle.upperRight)
+        steppe = Stepee(Vector2d(0, 0), Vector2d(width, height), jungle.lowerLeft, jungle.upperRight)
         for (animal in animals) {
             this.objectsMap.getEverytime(animal.position).place(animal)
         }
+    }
+
+    override fun returnBackGroundColor(position: Vector2d): Color {
+        return if (position in jungle) jungle.retColor()
+        else steppe.retColor()
+    }
+
+    override fun getAnimal(position: Vector2d): Animal? {
+        if (!objectsMap.containsKey(position)) {
+            return null
+        }
+        return objectsMap[position]!!.biggestAnimal()
     }
 
     override fun changeDay(currentIteration: Int) {
@@ -57,18 +69,24 @@ abstract class AbstractorWorldMap(animals: List<Animal>, jungle: Jungle, val wid
         }
 
         addGrass(jungle)
-        addGrass(stepee)
+        addGrass(steppe)
 
         this.objectsMap.forEach {
-            var (position,square) = it
-            this.mutableStates[square.position.x][square.position.y].value = square.toString() //TODO iverse this to observer coz its to lame and slow
+            val (position, square) = it
+            val (x, y) = position
+            try {
+                this.mutableStates[x][y].value =
+                    square.toString() //TODO inverse this to observer coz its to lame and slow
+            } catch (e: Exception) {
+                println("essunia $square ${square.animals} $position")
+            }
         }
-        this.objectsMap.removeNullSquares() //Remove squares that doesn't need to be here
+        this.objectsMap.removeNullSquares() //Remove squares that don't need to be here
     }
 
     override fun addAnimals(animals: List<Animal>) {
-        for (animal in animals) {
-            this.objectsMap.getEverytime(animal.position).place(animal)
+        with(this.objectsMap){
+            animals.forEach { getEverytime(it.position).place(it) }
         }
     }
 
@@ -86,7 +104,6 @@ abstract class AbstractorWorldMap(animals: List<Animal>, jungle: Jungle, val wid
                     Animal.getRandomGenes()
                 )
             )
-
         }
         addAnimals(animals)
     }
@@ -98,7 +115,7 @@ abstract class AbstractorWorldMap(animals: List<Animal>, jungle: Jungle, val wid
         } while (grass in this.objectsMap && !this.objectsMap[grass]!!.placeGrass())
         this.objectsMap.getEverytime(grass).placeGrass()
 
-        this.mutableStates[grass.x][grass.y].value = this.objectsMap.getEverytime(Vector2d(grass.x,grass.y)).toString()
+        this.mutableStates[grass.x][grass.y].value = this.objectsMap.getEverytime(Vector2d(grass.x, grass.y)).toString()
     }
 
     override fun getViewObj(position: Vector2d): MutableState<String> {

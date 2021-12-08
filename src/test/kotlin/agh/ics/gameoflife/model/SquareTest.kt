@@ -175,18 +175,18 @@ internal class SquareTest {
     @Test
     fun isOcuppied() {
         val square: Square = Square(Vector2d(1,3))
-        assertFalse(square.isOcuppied)
+        assertFalse(square.isOccupied)
         square.place(Animal(Vector2d(1,3), life=12))
-        assertTrue(square.isOcuppied)
+        assertTrue(square.isOccupied)
         square.placeGrass()
-        assertTrue(square.isOcuppied)
+        assertTrue(square.isOccupied)
 
 
 
         val square2 = Square(Vector2d(1,57))
-        assertFalse(square2.isOcuppied)
+        assertFalse(square2.isOccupied)
         square2.placeGrass()
-        assertTrue(square2.isOcuppied)
+        assertTrue(square2.isOccupied)
     }
 
     @Test

@@ -1,7 +1,7 @@
 package agh.ics.gameoflife.regions
 
 import agh.ics.gameoflife.position.Vector2d
-import java.util.AbstractMap
+import androidx.compose.ui.graphics.Color
 
 interface IRegion {
     /**
@@ -15,4 +15,10 @@ interface IRegion {
      * Returns random vector that is in this area
      */
     fun getRandomVector(): Vector2d
+
+
+    /**
+     * Returns [Color] that matches the IRegion specification, for background coloring in View
+     */
+    fun retColor(): Color
 }

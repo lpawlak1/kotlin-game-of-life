@@ -1,6 +1,7 @@
 package agh.ics.gameoflife.regions
 
 import agh.ics.gameoflife.position.Vector2d
+import androidx.compose.ui.graphics.Color
 import kotlin.random.Random
 
 /**
@@ -19,5 +20,13 @@ class Jungle(
         val x = Random.nextInt(lowerLeft.x, upperRight.x)
         val y = Random.nextInt(lowerLeft.y, upperRight.y)
         return Vector2d(x, y)
+    }
+
+    override fun retColor(): Color {
+        return Color(255, 175, 104, 255)
+    }
+
+    operator fun contains(position: Vector2d): Boolean {
+        return isIn(position)
     }
 }

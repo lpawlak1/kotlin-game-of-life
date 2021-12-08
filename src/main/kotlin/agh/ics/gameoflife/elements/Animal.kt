@@ -1,6 +1,6 @@
 package agh.ics.gameoflife.elements
 
-import agh.ics.gameoflife.map.AbstractorWorldMap
+import agh.ics.gameoflife.map.AbstractWorldMap
 import agh.ics.gameoflife.position.MapDirection
 import agh.ics.gameoflife.position.Vector2d
 import java.util.*
@@ -8,17 +8,25 @@ import kotlin.math.round
 import kotlin.random.Random
 
 
-class Animal(position: Vector2d,
-             direction: MapDirection = MapDirection.NORTH,
-             life: Int,
-             genes: Array<Int> = Array(32){0},
-             public var map: AbstractorWorldMap? = null
-    ) : AbstractElement(position) {
+class Animal(
+    position: Vector2d,
+    direction: MapDirection = MapDirection.NORTH,
+    life: Int,
+    /**
+     * Genes of animal, based on parents genes
+     */
+    val genes: Array<Int> = Array(32) { 0 },
+    /**
+     * Represents map that animal is being put to, needed for move with constraints like [agh.ics.gameoflife.map.WallWorldMap] or [agh.ics.gameoflife.map.WrappedWorldMap]
+     * Can be null, then none of these constraints will be used to block Animal from moving in any direction
+     */
+    var map: AbstractWorldMap? = null
+) : AbstractElement(position) {
 
     /**
-    * shows when last move of animal took place [Engine.iteration]
-    */
-    public var lastMove: Int = 0
+     * shows when last move of animal took place [agh.ics.gameoflife.engine.IEngine]
+     */
+    private var lastMove: Int = 0
 
 
     /**
@@ -32,7 +40,7 @@ class Animal(position: Vector2d,
     /**
      * Deduces one life day from life of animal
      */
-    public fun deduceDayLife(moveEnergy: Int){
+    fun deduceDayLife(moveEnergy: Int) {
         this.energy -= moveEnergy
     }
 
@@ -40,37 +48,32 @@ class Animal(position: Vector2d,
      * Adds [grassLife] to the total [energy] of animal,
      * making animal eat this grass
      */
-    public fun eat(grassLife: Int) {
+    fun eat(grassLife: Int) {
         this.energy += grassLife
     }
 
 
     /**
-     * Position of Animal on map, type: [Vector2d]
+     * Shows in which direction [Animal] is rotated
+     * Position of Animal on map
      */
-    public var direction = direction
+    var direction: MapDirection = direction
         private set
 
     /**
-     * Makes string of animal, it's direction reprezentation
+     * Makes string of animal, it's direction representation
      */
     override fun toString(): String {
         return direction.toString()
     }
 
-    /**
-     * Genes of animal, based on parents genes
-     */
-    public val genes: Array<Int> = genes
-
-
 
     /**
      * Represents amount of days spent by Animal on Map, needed for statistics
      */
-    public var lifeSpan: Int = 0
+    var lifeSpan: Int = 0
         set(newValue) {
-            if(field + 1 != newValue) return
+            if (field + 1 != newValue) return
             field = newValue
         }
 
@@ -80,40 +83,38 @@ class Animal(position: Vector2d,
      *
      * Returns true if animal moved, false otherwise.
      */
-    public fun move(lastMove: Int) : Boolean{
+    fun move(lastMove: Int): Boolean {
         this.lastMove = lastMove
 
-        val no_of_rotate = genes[Random.nextInt(genes.size)]
-
-        when(no_of_rotate) {
+        when (val noOfRotate = genes[Random.nextInt(genes.size)]) {
             0 -> {
                 val value = map?.translateVector(this.position + this.direction.toUnitVector())
-                if(value is Pair<Vector2d, Boolean>) {
+                if (value is Pair<Vector2d, Boolean>) {
                     val (position, moved) = value
                     if (moved) {
                         this.position = position
                         return true
                     }
-                }else{
+                } else {
                     this.position = this.position + this.direction.toUnitVector()
                     return true
                 }
             }
             4 -> {
                 val value = map?.translateVector(this.position - this.direction.toUnitVector())
-                if(value is Pair<Vector2d, Boolean>) {
+                if (value is Pair<Vector2d, Boolean>) {
                     val (position, moved) = value
                     if (moved) {
                         this.position = position
                         return true
                     }
-                }else{
+                } else {
                     this.position = this.position + this.direction.toUnitVector().opposite()
                     return true
                 }
             }
             else -> {
-                this.direction.next(no_of_rotate)
+                this.direction = this.direction.next(noOfRotate)
             }
         }
         return false
@@ -124,60 +125,55 @@ class Animal(position: Vector2d,
      *
      * Returns energy for its child
      */
-    private fun getChildEnergy(): Double{
-        val energy = (this.energy*0.25)
+    private fun getChildEnergy(): Double {
+        val energy = (this.energy * 0.25)
         this.energy -= energy.toInt()
         return energy
     }
 
 
     companion object {
-        public fun getRandomGenes(): Array<Int>{
-            val arr = Array<Int>(32){0}
-            for (i in 1..32){
-                arr[i-1] = Random.nextInt(7)
+        fun getRandomGenes(): Array<Int> { //TODO("Make super every gene is present")
+            val arr = Array(32) { 0 }
+            for (i in 1..32) {
+                arr[i - 1] = Random.nextInt(7)
             }
             arr.sort()
             return arr
         }
-        public fun breed(first:Animal, second:Animal): Animal{
-            //Perform amazing operations to breed
+
+        fun breed(first: Animal, second: Animal): Animal {
             val genes = getGenesFromParents(first, second)
-            val child_energy = (first.getChildEnergy() + second.getChildEnergy()).toInt()
-            val child_position = first.position
+            val childEnergy = (first.getChildEnergy() + second.getChildEnergy()).toInt()
+            val childPosition = first.position
 
-            return Animal(child_position,
-                          MapDirection.directionFactory(Random.Default.nextInt(8)),
-                          child_energy,
-                          genes)
+            return Animal(
+                childPosition,
+                MapDirection.directionFactory(Random.Default.nextInt(8)),
+                childEnergy,
+                genes
+            )
         }
-        internal fun getGenesFromParents(parent1: Animal, parent2: Animal): Array<Int> {
-            val childGenes = Array(32){ 0 }
 
-            val suma = parent1.energy + parent2.energy
-
-            val prec1: Int = round((32*(parent1.energy).toDouble())/suma).toInt()
-
-            val rng_kto: Boolean = Random.Default.nextInt(0,2) == 1
-
-            if (rng_kto){
-                for (i in 0 until prec1){
-                    childGenes[i] = parent1.genes[i]
-                }
-
-                for (i in prec1 until 32){
-                    childGenes[i] = parent2.genes[i]
-                }
+        private fun reWriteGenes(first: Int, last: Int, childGenes: Array<Int>, parent: Animal) {
+            for (i in first until last) {
+                childGenes[i] = parent.genes[i]
             }
-            else {
-                for (i in 0 until prec1){
-                    childGenes[i] = parent2.genes[i]
-                }
+        }
 
-                for (i in prec1 until 32){
-                    childGenes[i] = parent1.genes[i]
-                }
+        private fun getGenesFromParents(parent1: Animal, parent2: Animal): Array<Int> {
 
+            val childGenes = Array(32) { 0 }
+            val suma = parent1.energy + parent2.energy
+            val cut1: Int = round((32 * (parent1.energy).toDouble()) / suma).toInt()
+            val rngWho: Boolean = Random.Default.nextInt(0, 2) == 1
+
+            if (rngWho) {
+                reWriteGenes(0, cut1, childGenes, parent1)
+                reWriteGenes(cut1, 32, childGenes, parent2)
+            } else {
+                reWriteGenes(0, cut1, childGenes, parent2)
+                reWriteGenes(cut1, 32, childGenes, parent1)
             }
 
             Arrays.sort(childGenes)
