@@ -109,29 +109,6 @@ internal class SquareTest {
     }
 
     @Test
-    fun eat() {
-        val square: Square = Square(Vector2d(1,3))
-
-        val animal_1 =Animal(Vector2d(1,3),direction = MapDirection.NORTH, life = 10)
-        assertTrue(square.place(animal_1))
-        assertTrue(square.placeGrass())
-
-        assertFalse(square.placeGrass())
-        square.eat(2)
-        assertTrue(animal_1.energy == 12)
-
-        val animal_2 =Animal(Vector2d(1,3),direction = MapDirection.NORTH, life = 12)
-
-        square.place(animal_2)
-        assertTrue(square.placeGrass())
-
-        square.eat(2)
-        assertTrue(square.animals.size == 2)
-        assertEquals(animal_1.energy, 13)
-        assertEquals(animal_2.energy, 13)
-    }
-
-    @Test
     fun place() {
         val square: Square = Square(Vector2d(1,3))
         assertTrue(square.place(Animal(Vector2d(1,3),direction = MapDirection.NORTH, life = 10)))
@@ -142,10 +119,6 @@ internal class SquareTest {
     @Test
     fun placeGrass() {
         val square: Square = Square(Vector2d(1,3))
-        assertTrue(square.place(Animal(Vector2d(1,3),direction = MapDirection.NORTH, life = 10)))
-        assertTrue(square.placeGrass())
-        assertFalse(square.placeGrass())
-        square.eat(1)
         assertTrue(square.placeGrass())
     }
 
