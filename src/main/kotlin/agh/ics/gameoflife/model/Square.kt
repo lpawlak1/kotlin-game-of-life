@@ -1,10 +1,14 @@
 package agh.ics.gameoflife.model
 
+import agh.ics.gameoflife.elements.AbstractElement
 import agh.ics.gameoflife.elements.Animal
 import agh.ics.gameoflife.elements.Grass
 import agh.ics.gameoflife.position.Vector2d
+import agh.ics.gameoflife.view.ITopElementChanged
+import agh.ics.gameoflife.view.ITopElementObserver
 
-class Square(val position: Vector2d) {
+
+class Square(val position: Vector2d) : ITopElementChanged {
     /**
      * It is main container for all [Animal] in Square
      * Animals are sorted by their [Animal.energy] left, the smallest [Animal.energy] first
@@ -33,6 +37,9 @@ class Square(val position: Vector2d) {
      */
     fun removeDead() {
         animals.removeIf { it.energy <= 0 }
+        if (animals.size == 0 && this.grass == null) {
+            this.elementChanged(null, this.position)
+        }
     }
 
     /**
@@ -42,6 +49,9 @@ class Square(val position: Vector2d) {
     fun move(currentIteration: Int): List<Animal> {
         val (math, rest) = animals.partition { it.move(currentIteration) }
         this.animals = rest as MutableList<Animal>
+        if (this.animals.size == 0 && this.grass == null) {
+            this.elementChanged(null, this.position)
+        }
         return math
     }
 
@@ -57,6 +67,7 @@ class Square(val position: Vector2d) {
             for (animal in list) {
                 animal.eat(dividedEnergy)
             }
+            this.elementChanged(anim, this.position)
             this.grass = null
         }
     }
@@ -90,6 +101,9 @@ class Square(val position: Vector2d) {
      * @param animal [Animal] to be put into square
      */
     fun place(animal: Animal): Boolean {
+        if (animal.energy > (this.biggestAnimal()?.energy ?: 0)) {
+            this.elementChanged(animal, this.position)
+        }
         animals.add(animal)
         return true
     }
@@ -99,8 +113,9 @@ class Square(val position: Vector2d) {
      * @return whether grass was put into square (true - placed, false - not)
      */
     fun placeGrass(): Boolean {
-        if (grass == null) {
+        if (grass == null && animals.size == 0) {
             grass = Grass(this.position)
+            this.elementChanged(this.grass!!, this.position)
             return true
         }
         return false
@@ -124,8 +139,23 @@ class Square(val position: Vector2d) {
         return ret
     }
 
-    override fun toString(): String {
-        return (this.biggestAnimal() ?: this.grass ?: "").toString()
+    /**
+     * Keeps list of observers that wait for notification on top-most element (biggest animal or grass)
+     */
+    private val topElementObservers = mutableListOf<ITopElementObserver>()
+
+    /**
+     * Adds [observer] to [topElementObservers]
+     */
+    override fun addObserver(observer: ITopElementObserver) {
+        this.topElementObservers.add(observer)
+    }
+
+    /**
+     * Notifies each [topElementObservers] that element changed, sending [element] and [position]
+     */
+    override fun elementChanged(element: AbstractElement?, position: Vector2d) {
+        topElementObservers.forEach { it.notify(element, position) }
     }
 
     /**
@@ -137,3 +167,4 @@ class Square(val position: Vector2d) {
 
 
 }
+

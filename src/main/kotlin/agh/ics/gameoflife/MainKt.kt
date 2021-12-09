@@ -5,6 +5,7 @@ import agh.ics.gameoflife.engine.MagicEngine
 import agh.ics.gameoflife.map.WrappedWorldMap
 import agh.ics.gameoflife.position.Vector2d
 import agh.ics.gameoflife.regions.Jungle
+import agh.ics.gameoflife.staticView.SquareView
 import agh.ics.gameoflife.view.GridCell
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -21,7 +22,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
@@ -62,7 +62,8 @@ fun getMainView(running: MutableState<Boolean>) {
         runSimulation(running, 200, engine)
     }
 
-    val img = painterResource("animal.png")
+    val squareView = SquareView().getAnimalViews()
+
     MaterialTheme {
         Row {
             Column {
@@ -75,11 +76,9 @@ fun getMainView(running: MutableState<Boolean>) {
                     val stop = "Stop"
                     Text("${if (running.value) stop else start} simulation")
                 }
-
             }
             Column(modifier = Modifier.size(((size + 1) * 20).dp)) {
                 val siz2 = size + 1
-                Text("essa")
                 LazyVerticalGrid(cells = GridCells.Fixed(siz2)) {
                     items(siz2 * siz2) {
                         val x = it / siz2
@@ -91,7 +90,7 @@ fun getMainView(running: MutableState<Boolean>) {
                             y,
                             engine.map.returnBackGroundColor(Vector2d(x, y))
                         )
-                        a.getView(img)
+                        a.getView(squareView)
                     }
                 }
             }
@@ -109,7 +108,7 @@ fun main() {
 
     application {
         Window(
-            onCloseRequest = ::exitApplication,
+            onCloseRequest = { running.value = false;exitApplication() },
             title = "Simulation",
             state = rememberWindowState(
                 position = WindowPosition(alignment = Alignment.Center),

@@ -25,13 +25,13 @@ tasks.test {
     useJUnitPlatform()
 }
 
-tasks.withType<KotlinCompile>() {
+tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
 }
 
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "agh.ics.gameoflife.MainKtKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "game_of_life"

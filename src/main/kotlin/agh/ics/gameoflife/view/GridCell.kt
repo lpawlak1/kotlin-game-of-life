@@ -2,6 +2,7 @@ package agh.ics.gameoflife.view
 
 import agh.ics.gameoflife.map.IWorldMap
 import agh.ics.gameoflife.position.Vector2d
+import agh.ics.gameoflife.staticView.ViewValues
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.TooltipArea
@@ -12,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.painter.Painter
 
 
 class GridCell(
@@ -25,19 +26,18 @@ class GridCell(
 
     @Preview
     @Composable
-    fun getView(img: androidx.compose.ui.graphics.painter.Painter) {
+    fun getView(painters: Map<String, Painter>) {
         TooltipArea(tooltip = {
             Text(map.getViewObj(Vector2d(x, y)).value)
         }) {
             Surface(color = background) {
                 if (text.value == "*") {
-                    Image(painter = painterResource("grass2.png"), "", modifier = Modifier.fillMaxSize())
-                } else if (text.value != "") {
-                    Image(img, "", modifier = Modifier.fillMaxSize())
+                    Image(painter = painters[ViewValues.grass]!!, "", modifier = Modifier.fillMaxSize())
+                } else if (text.value != "null") {
+                    Image(painter = painters[ViewValues.animal]!!, "", modifier = Modifier.fillMaxSize())
                 } else {
-                    Image(painter = painterResource("empty.png"), "", modifier = Modifier.fillMaxSize())
+                    Image(painter = painters[ViewValues.nul]!!, "", modifier = Modifier.fillMaxSize())
                 }
-
             }
         }
     }

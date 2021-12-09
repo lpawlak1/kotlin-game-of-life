@@ -4,10 +4,11 @@ import agh.ics.gameoflife.elements.Animal
 import agh.ics.gameoflife.position.Vector2d
 import agh.ics.gameoflife.regions.IRegion
 import agh.ics.gameoflife.view.IGetView
+import agh.ics.gameoflife.view.ITopElementObserver
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
 
-interface IWorldMap : IGetView {
+interface IWorldMap : IGetView, ITopElementObserver {
     /**
      * Contains amount of [Animal]s currently living on map
      */
