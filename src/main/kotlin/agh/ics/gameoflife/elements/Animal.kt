@@ -133,10 +133,13 @@ class Animal(
 
 
     companion object {
-        fun getRandomGenes(): Array<Int> { //TODO("Make super every gene is present")
+        fun getRandomGenes(): Array<Int> {
             val arr = Array(32) { 0 }
-            for (i in 1..32) {
-                arr[i - 1] = Random.nextInt(7)
+            for (i in 0 until 8){
+                arr[i] = i
+            }
+            for (i in 8..32) {
+                arr[i - 1] = Random.nextInt(0,8)
             }
             arr.sort()
             return arr
