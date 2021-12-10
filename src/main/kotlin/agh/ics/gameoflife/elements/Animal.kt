@@ -88,7 +88,7 @@ class Animal(
 
         when (val noOfRotate = genes[Random.nextInt(genes.size)]) {
             0 -> {
-                val value = map?.translateVector(this.position + this.direction.toUnitVector())
+                val value = map?.translateVector(this.position + this.direction.toUnitVector(), this.position)
                 if (value is Pair<Vector2d, Boolean>) {
                     val (position, moved) = value
                     if (moved) {
@@ -101,7 +101,7 @@ class Animal(
                 }
             }
             4 -> {
-                val value = map?.translateVector(this.position - this.direction.toUnitVector())
+                val value = map?.translateVector(this.position - this.direction.toUnitVector(), this.position)
                 if (value is Pair<Vector2d, Boolean>) {
                     val (position, moved) = value
                     if (moved) {

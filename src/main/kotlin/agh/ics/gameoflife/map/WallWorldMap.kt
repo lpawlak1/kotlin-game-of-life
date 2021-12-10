@@ -2,27 +2,26 @@ package agh.ics.gameoflife.map
 
 import agh.ics.gameoflife.elements.Animal
 import agh.ics.gameoflife.position.Vector2d
-import agh.ics.gameoflife.regions.Jungle
+import agh.ics.gameoflife.statistics.Options
+import agh.ics.gameoflife.statistics.Statistics
 
 class WallWorldMap(
     val animals: List<Animal>,
-    jungle_region: Jungle,
-    width: Int,
-    height: Int,
-    override var lenAnimals: Int = 6
-) : AbstractWorldMap(animals, jungle_region, width, height) {
+    statistics: Statistics,
+    opts: Options
+) : AbstractWorldMap(animals, statistics, opts) {
 
     init {
         this.animals.forEach { it.map = this }
     }
 
-    override fun translateVector(position: Vector2d): Pair<Vector2d, Boolean> {
+    override fun translateVector(position: Vector2d, oldPosition: Vector2d): Pair<Vector2d, Boolean> {
         var (x, y) = position
-        if (position.x > width) {
-            x = width
+        if (position.x > opts.width) {
+            x = opts.width
         }
-        if (position.y > height) {
-            y = height
+        if (position.y > opts.height) {
+            y = opts.height
         }
         if (position.x < 0) {
             x = 0
@@ -30,7 +29,7 @@ class WallWorldMap(
         if (position.y < 0) {
             y = 0
         }
-        val moved = (position != Vector2d(x, y))
+        val moved = (oldPosition != Vector2d(x, y))
         return Pair(Vector2d(x, y), moved)
     }
 

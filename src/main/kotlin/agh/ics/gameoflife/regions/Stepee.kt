@@ -5,10 +5,10 @@ import androidx.compose.ui.graphics.Color
 import kotlin.random.Random
 
 class Stepee(
-    val externalLowerLeft: Vector2d,
-    val externalUpperRight: Vector2d,
-    val lowerLeft: Vector2d,
-    val upperRight: Vector2d
+    private val externalLowerLeft: Vector2d,
+    private val externalUpperRight: Vector2d,
+    private val lowerLeft: Vector2d,
+    private val upperRight: Vector2d
 ) : IRegion {
 
     override fun isIn(test: Vector2d): Boolean {
@@ -19,8 +19,8 @@ class Stepee(
     override fun getRandomVector(): Vector2d {
         lateinit var rngVector: Vector2d
         do {
-            val x = Random.nextInt(externalLowerLeft.x, externalUpperRight.x)
-            val y = Random.nextInt(externalLowerLeft.y, externalUpperRight.y)
+            val x = Random.nextInt(externalLowerLeft.x, externalUpperRight.x + 1)
+            val y = Random.nextInt(externalLowerLeft.y, externalUpperRight.y + 1)
             rngVector = Vector2d(x, y)
 
         } while (!this.isIn(rngVector))
@@ -30,5 +30,9 @@ class Stepee(
 
     override fun retColor(): Color {
         return Color(157, 66, 21, 255)
+    }
+
+    operator fun contains(vec: Vector2d): Boolean {
+        return this.isIn(vec)
     }
 }

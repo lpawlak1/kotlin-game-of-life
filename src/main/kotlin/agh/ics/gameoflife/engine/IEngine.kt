@@ -14,7 +14,7 @@ interface IEngine {
     fun runIteration()
 
     /**
-     * Places [howMany] (amount) randomly animals, with [initialLife] as their [agh.ics.gameoflife.elements.Animal.energy]
+     * Places [howMany] (amount) randomly animals, with initialLife from [agh.ics.gameoflife.statistics.Options] as their [agh.ics.gameoflife.elements.Animal.energy]
      */
-    fun placeAnimals(howMany: Int, initialLife: Int)
+    fun placeAnimals(howMany: Int)
 }

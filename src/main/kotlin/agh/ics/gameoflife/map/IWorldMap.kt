@@ -1,14 +1,18 @@
 package agh.ics.gameoflife.map
 
 import agh.ics.gameoflife.elements.Animal
+import agh.ics.gameoflife.elements.Grass
 import agh.ics.gameoflife.position.Vector2d
 import agh.ics.gameoflife.regions.IRegion
+import agh.ics.gameoflife.statistics.Options
 import agh.ics.gameoflife.view.IGetView
 import agh.ics.gameoflife.view.ITopElementObserver
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
 
 interface IWorldMap : IGetView, ITopElementObserver {
+    var opts: Options
+
     /**
      * Contains amount of [Animal]s currently living on map
      */
@@ -18,7 +22,7 @@ interface IWorldMap : IGetView, ITopElementObserver {
      * Translates vector when it can't go to desired [position]
      * Return [Pair] that says where the new position is [Vector2d] and whether it should even move [Boolean]
      */
-    fun translateVector(position: Vector2d): Pair<Vector2d, Boolean>
+    fun translateVector(position: Vector2d, oldPosition: Vector2d): Pair<Vector2d, Boolean>
 
     /**
      * Does the whole iteration on events, eating, breeding, etc
@@ -31,15 +35,15 @@ interface IWorldMap : IGetView, ITopElementObserver {
     fun addAnimals(animals: List<Animal>)
 
     /**
-     * Adds grass on random vector in specified region
+     * Adds 2 grasses on random vector if possible
+     * Returns how many grasses have been added
      */
-    fun addGrass(region: IRegion)
+    fun addGrass(): Int
 
     /**
-     * Adds [value] animals with their [Animal.energy] equal to [initialLife]
+     * Adds [value] randomly made Animals
      */
-    fun addRandomAnimals(value: Int, initialLife: Int)
-
+    fun addRandomAnimals(value: Int)
 
     /**
      * Gets the biggest [Animal] that is currently occupying [position]
@@ -55,5 +59,11 @@ interface IWorldMap : IGetView, ITopElementObserver {
      * Returns [Color] based on [IRegion] that occupies [position]
      */
     fun returnBackGroundColor(position: Vector2d): Color
+
+    /**
+     * Gets 2 or fewer cells where [Grass] can be placed
+     */
+    fun getGrassesToPlace(): Pair<Vector2d?,Vector2d?>
+    fun getGrassAmount(): Int
 
 }

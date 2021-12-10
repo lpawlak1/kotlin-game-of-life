@@ -17,8 +17,8 @@ class Jungle(
     }
 
     override fun getRandomVector(): Vector2d {
-        val x = Random.nextInt(lowerLeft.x, upperRight.x)
-        val y = Random.nextInt(lowerLeft.y, upperRight.y)
+        val x = Random.nextInt(lowerLeft.x, upperRight.x + 1)
+        val y = Random.nextInt(lowerLeft.y, upperRight.y + 1)
         return Vector2d(x, y)
     }
 
@@ -28,5 +28,16 @@ class Jungle(
 
     operator fun contains(position: Vector2d): Boolean {
         return isIn(position)
+    }
+
+    companion object {
+        fun calculateJungle(width: Int, height: Int, jungle_ratio: Double): Jungle {
+            val jungleWidth: Int = (width * jungle_ratio).toInt()
+            val jungleHeight: Int = (height * jungle_ratio).toInt()
+            val lowerLeft = Vector2d((width - jungleWidth) / 2, (height - jungleHeight) / 2)
+            val upperRight = Vector2d(lowerLeft.x + jungleWidth, lowerLeft.y + jungleHeight)
+            return Jungle(lowerLeft, upperRight)
+        }
+
     }
 }

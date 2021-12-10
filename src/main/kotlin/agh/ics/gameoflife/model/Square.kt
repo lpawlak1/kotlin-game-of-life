@@ -13,13 +13,13 @@ class Square(val position: Vector2d) : ITopElementChanged {
      * It is main container for all [Animal] in Square
      * Animals are sorted by their [Animal.energy] left, the smallest [Animal.energy] first
      */
-    internal var animals: MutableList<Animal> = mutableListOf()
+    var animals: MutableList<Animal> = mutableListOf()
 
     /**
      * As only one [Grass] can be in Square just one mutable field is enough
      * It can be nullable
      */
-    private var grass: Grass? = null
+    var grass: Grass? = null
 
     /**
      * Before anything in simulation we have to add 1 to their [Animal.lifeSpan]
@@ -35,11 +35,14 @@ class Square(val position: Vector2d) : ITopElementChanged {
     /**
      * Removes every dead [Animal] from square
      */
-    fun removeDead() {
-        animals.removeIf { it.energy <= 0 }
+    fun removeDead(): Pair<Int,Int> {
+        val (live,dead) = this.animals.partition { it.energy > 0 }
+        this.animals = live.toMutableList()
         if (animals.size == 0 && this.grass == null) {
             this.elementChanged(null, this.position)
         }
+
+        return dead.sumOf { it.lifeSpan } to dead.size
     }
 
     /**
@@ -59,7 +62,7 @@ class Square(val position: Vector2d) : ITopElementChanged {
      * Performs eat action on biggest animal in square (if possible)
      * [eatValue] is value of amount of energy per grass eaten
      */
-    fun eat(eatValue: Int) {
+    fun eat(eatValue: Int): Boolean {
         if (grass != null && animals.size != 0) {
             val anim: Animal = this.biggestAnimal()!!
             val list: List<Animal> = this.animals.filter { it.energy == anim.energy }
@@ -69,14 +72,16 @@ class Square(val position: Vector2d) : ITopElementChanged {
             }
             this.elementChanged(anim, this.position)
             this.grass = null
+            return true
         }
+        return false
     }
 
     /**
      * Breeds new animal from 2 biggest animals
-     * @return true if animal was successfully breded
+     * @return  animal if breeding went successfully, null otherwise
      */
-    fun breed(min_life_required: Int): Boolean {
+    fun breed(min_life_required: Int): Animal? {
         if (animals.size >= 2) {
             val first: Animal = this.pollBiggestAnimal()
             val second: Animal = this.pollBiggestAnimal()
@@ -84,16 +89,16 @@ class Square(val position: Vector2d) : ITopElementChanged {
             if (second.energy < min_life_required || first.energy < min_life_required) {
                 place(second)
                 place(first)
-                return false
+                return null
             }
 
             val newAnimal: Animal = Animal.breed(first, second)
             place(second)
             place(first)
             place(newAnimal)
-            return true
+            return newAnimal
         }
-        return false
+        return null
     }
 
     /**
@@ -135,7 +140,7 @@ class Square(val position: Vector2d) : ITopElementChanged {
      */
     fun pollBiggestAnimal(): Animal {
         val ret: Animal = this.biggestAnimal()!!
-        this.animals.removeIf { ret === it }
+        this.animals.removeIf { ret === it } // === to look at objects pointer not actual values
         return ret
     }
 

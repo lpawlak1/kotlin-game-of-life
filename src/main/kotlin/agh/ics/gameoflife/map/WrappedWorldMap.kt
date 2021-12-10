@@ -2,33 +2,32 @@ package agh.ics.gameoflife.map
 
 import agh.ics.gameoflife.elements.Animal
 import agh.ics.gameoflife.position.Vector2d
-import agh.ics.gameoflife.regions.Jungle
+import agh.ics.gameoflife.statistics.Options
+import agh.ics.gameoflife.statistics.Statistics
 
 class WrappedWorldMap(
     val animals: List<Animal>,
-    jungle_region: Jungle,
-    width: Int,
-    height: Int,
-    override var lenAnimals: Int = 6 //TODO("Change that to actual variable")
-) : AbstractWorldMap(animals, jungle_region, width, height) {
+    statistics: Statistics,
+    opts: Options
+) : AbstractWorldMap(animals, statistics, opts) {
 
     init {
         this.animals.forEach { it.map = this }
     }
 
-    override fun translateVector(position: Vector2d): Pair<Vector2d, Boolean> {
+    override fun translateVector(position: Vector2d, oldPosition: Vector2d): Pair<Vector2d, Boolean> {
         var (x, y) = position
-        if (x > width) {
+        if (x > opts.width) {
             x = 0
         } else if (x < 0) {
-            x = width
+            x = opts.width
         }
-        if (y > height) {
+        if (y > opts.height) {
             y = 0
         } else if (y < 0) {
-            y = height
+            y = opts.height
         }
-        val moved = (position == Vector2d(x, y))
+        val moved = (oldPosition != Vector2d(x, y))
         return Pair(Vector2d(x, y), moved)
     }
 
