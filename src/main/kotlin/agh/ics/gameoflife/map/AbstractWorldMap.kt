@@ -7,6 +7,7 @@ import agh.ics.gameoflife.position.MapDirection
 import agh.ics.gameoflife.position.Vector2d
 import agh.ics.gameoflife.regions.Jungle
 import agh.ics.gameoflife.regions.Stepee
+import agh.ics.gameoflife.staticView.MutableWorldElement
 import agh.ics.gameoflife.statistics.Options
 import agh.ics.gameoflife.statistics.Statistics
 import agh.ics.gameoflife.view.ITopElementObserver
@@ -41,7 +42,8 @@ abstract class AbstractWorldMap(
         Stepee(Vector2d(0, 0), Vector2d(opts.width, opts.height), jungle.lowerLeft, jungle.upperRight)
     private val objectsMap: HashMap<Vector2d, Square> = hashMapOf()
 
-    private val mutableStates = Array(opts.width + 1) { Array(opts.height + 1) { mutableStateOf("null") } }
+    private val mutableStates =
+        Array(opts.width + 1) { Array(opts.height + 1) { mutableStateOf(MutableWorldElement.Default) } }
 
 
     init {
@@ -58,7 +60,10 @@ abstract class AbstractWorldMap(
 
     override fun notify(element: AbstractElement?, position: Vector2d) {
         val (x, y) = position
-        this.mutableStates[x][y].value = "$element"
+        if (element is Animal) {
+            this.mutableStates[x][y].value = MutableWorldElement(element, element.energy)
+        }
+        this.mutableStates[x][y].value = MutableWorldElement(element, 0)
     }
 
     override fun getAnimal(position: Vector2d): Animal? {
@@ -176,7 +181,7 @@ abstract class AbstractWorldMap(
     }
 
 
-    override fun getViewObj(position: Vector2d): MutableState<String> {
+    override fun getViewObj(position: Vector2d): MutableState<MutableWorldElement> {
         return this.mutableStates[position.x][position.y]
     }
 

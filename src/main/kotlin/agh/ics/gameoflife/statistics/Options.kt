@@ -7,6 +7,7 @@ data class Options(
     val moveEnergy: Int,
     val plantEnergy: Int,
     val jungleRatio: Double,
+    val isMagicEngine: Boolean
 ){
     val breedEnergy: Int = startEnergy / 2
 }

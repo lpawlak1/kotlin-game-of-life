@@ -4,6 +4,7 @@ import agh.ics.gameoflife.elements.Animal
 import agh.ics.gameoflife.elements.Grass
 import agh.ics.gameoflife.position.Vector2d
 import agh.ics.gameoflife.regions.IRegion
+import agh.ics.gameoflife.staticView.MutableWorldElement
 import agh.ics.gameoflife.statistics.Options
 import agh.ics.gameoflife.view.IGetView
 import agh.ics.gameoflife.view.ITopElementObserver
@@ -51,9 +52,9 @@ interface IWorldMap : IGetView, ITopElementObserver {
     fun getAnimal(position: Vector2d): Animal?
 
     /**
-     * Gets [MutableState<String>] that represents [position]
+     * Gets [MutableState<MutableWorldElement>] that represents [position]
      */
-    override fun getViewObj(position: Vector2d): MutableState<String>
+    override fun getViewObj(position: Vector2d): MutableState<MutableWorldElement>
 
     /**
      * Returns [Color] based on [IRegion] that occupies [position]
@@ -63,7 +64,7 @@ interface IWorldMap : IGetView, ITopElementObserver {
     /**
      * Gets 2 or fewer cells where [Grass] can be placed
      */
-    fun getGrassesToPlace(): Pair<Vector2d?,Vector2d?>
+    fun getGrassesToPlace(): Pair<Vector2d?, Vector2d?>
     fun getGrassAmount(): Int
 
 }
