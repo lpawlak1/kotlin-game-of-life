@@ -6,6 +6,7 @@ import agh.ics.gameoflife.position.Vector2d
 import agh.ics.gameoflife.regions.IRegion
 import agh.ics.gameoflife.staticView.MutableWorldElement
 import agh.ics.gameoflife.statistics.Options
+import agh.ics.gameoflife.statistics.Statistics
 import agh.ics.gameoflife.view.IGetView
 import agh.ics.gameoflife.view.ITopElementObserver
 import androidx.compose.runtime.MutableState
@@ -13,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 
 interface IWorldMap : IGetView, ITopElementObserver {
     var opts: Options
+    var statistics: Statistics
 
     /**
      * Contains amount of [Animal]s currently living on map

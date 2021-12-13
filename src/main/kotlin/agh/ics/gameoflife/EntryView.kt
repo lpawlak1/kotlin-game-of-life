@@ -40,7 +40,7 @@ class EntryView {
         null
     )
 
-    var options: Options? = null
+    var options: Options = Options.Default
 
     @OptIn(ExperimentalFoundationApi::class)
     @Preview
@@ -54,14 +54,26 @@ class EntryView {
         plantEnergyField.init2()
         jungleRatioField.init2()
 
+        lateinit var width: MutableState<String>
+        lateinit var height: MutableState<String>
+        lateinit var startEnergy: MutableState<String>
+        lateinit var moveEnergy: MutableState<String>
+        lateinit var plantEnergy: MutableState<String>
+        lateinit var jungleRatio: MutableState<String>
+        lateinit var checkedState: MutableState<Boolean>
+
+
+
         MaterialTheme {
-            var width = remember { mutableStateOf("10") }
-            var height = remember { mutableStateOf("10") }
-            var startEnergy = remember { mutableStateOf("50") }
-            var moveEnergy = remember { mutableStateOf("3") }
-            var plantEnergy = remember { mutableStateOf("100") }
-            var jungleRatio = remember { mutableStateOf("0.5") }
-            val checkedState = remember { mutableStateOf(true) }
+            with (Options.Default){
+                width = remember { mutableStateOf(this.width.toString()) }
+                height = remember { mutableStateOf(this.width.toString()) }
+                startEnergy = remember { mutableStateOf(this.startEnergy.toString()) }
+                moveEnergy = remember { mutableStateOf(this.moveEnergy.toString()) }
+                plantEnergy = remember { mutableStateOf(this.plantEnergy.toString()) }
+                jungleRatio = remember { mutableStateOf(this.jungleRatio.toString()) }
+                checkedState = remember { mutableStateOf(this.isMagicEngine) }
+            }
             Column {
                 widthField.value = width
                 widthField.getView()

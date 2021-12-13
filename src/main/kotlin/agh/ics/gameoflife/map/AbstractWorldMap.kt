@@ -32,7 +32,7 @@ internal fun HashMap<Vector2d, Square>.removeNullSquares() {
 
 abstract class AbstractWorldMap(
     animals: List<Animal>,
-    val statistics: Statistics,
+    final override var statistics: Statistics,
     final override var opts: Options
 ) : IWorldMap {
 

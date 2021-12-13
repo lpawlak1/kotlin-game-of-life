@@ -10,6 +10,9 @@ data class Options(
     val isMagicEngine: Boolean
 ){
     val breedEnergy: Int = startEnergy / 2
+    companion object {
+        val Default = Options(10,10,50,3,100,0.5, false)
+    }
 }
 
 

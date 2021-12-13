@@ -37,6 +37,15 @@ class Animal(
     var energy: Int = life
         private set
 
+    var isTracked: Boolean = false
+
+    var amountOfChilds: Int = 0
+
+    var isAncestorFromTracked: Boolean = false
+    var trackedParent: Animal? = null
+
+    var amountOfAncestors: Long = 0
+
     /**
      * Deduces one life day from life of animal
      */
@@ -150,13 +159,31 @@ class Animal(
             val childEnergy = (first.getChildEnergy() + second.getChildEnergy()).toInt()
             val childPosition = first.position
 
-            return Animal(
+            first.amountOfChilds++
+            second.amountOfChilds++
+
+            with (Animal(
                 childPosition,
                 MapDirection.directionFactory(Random.Default.nextInt(8)),
                 childEnergy,
                 genes,
                 first.map
-            )
+            )){
+                for (elem in listOf(first,second)){
+                    if (elem.isAncestorFromTracked ){
+                        this.isAncestorFromTracked = true
+                        elem.trackedParent!!.amountOfAncestors  += 1
+                        this.trackedParent = elem.trackedParent?:elem
+                        break
+                    } else if (elem.isTracked){
+                        this.isAncestorFromTracked = true
+                        elem.amountOfAncestors  += 1
+                        this.trackedParent = elem
+                        break
+                    }
+                }
+                return this
+            }
         }
 
         private fun reWriteGenes(first: Int, last: Int, childGenes: Array<Int>, parent: Animal) {

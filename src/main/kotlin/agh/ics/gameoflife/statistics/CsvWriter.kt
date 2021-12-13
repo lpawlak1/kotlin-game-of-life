@@ -7,7 +7,13 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import java.io.FileOutputStream
+import kotlin.math.round
 
+fun Double.round(decimals: Int): Double {
+    var multiplier = 1.0
+    repeat(decimals) { multiplier *= 10 }
+    return round(this * multiplier) / multiplier
+}
 
 class Statistics {
     lateinit var map: IWorldMap
@@ -20,6 +26,7 @@ class Statistics {
     lateinit var numberOfDay: MutableState<Long>
     lateinit var maxGenotypeMS: MutableState<String>
     lateinit var maxGenotypeAmountMS: MutableState<Int>
+    lateinit var avgNumberOfChildsMS: MutableState<Double>
 
     var sumOfDeadLifeSpan: Long = 0
     var amountOfDeadAnimals: Long = 0
@@ -31,6 +38,33 @@ class Statistics {
 
     var dataList = mutableListOf<RowData>()
 
+    var trackedAnimal: Animal? = null
+        set(value) {
+            field?.isTracked = false
+
+            animals.forEach {
+                it.isAncestorFromTracked = false
+                it.trackedParent = null
+            }
+
+            deathDate = 0L
+
+            value?.amountOfChilds = 0
+            value?.isTracked = true
+
+            trackedAnimalChildrenMS.value = 0L
+            trackedAnimalAncestorsMS.value = 0L
+            trackedAnimalDeathDateMS.value = 0L
+            trackedAnimalLifeSpanMS.value = 0L
+
+            field = value
+        }
+    var deathDate:Long = 0L
+    lateinit var trackedAnimalChildrenMS: MutableState<Long>
+    lateinit var trackedAnimalAncestorsMS: MutableState<Long>
+    lateinit var trackedAnimalDeathDateMS: MutableState<Long>
+    lateinit var trackedAnimalLifeSpanMS: MutableState<Long>
+
     @Composable
     fun init() {
         this.numberOfDay = remember { mutableStateOf(0) }
@@ -41,6 +75,12 @@ class Statistics {
         this.amountOfDeadAnimalsMS = remember { mutableStateOf(0L) }
         this.maxGenotypeMS = remember { mutableStateOf("") }
         this.maxGenotypeAmountMS = remember { mutableStateOf(0) }
+        this.avgNumberOfChildsMS = remember { mutableStateOf(0.0) }
+
+        this.trackedAnimalChildrenMS = remember { mutableStateOf(0L) }
+        this.trackedAnimalAncestorsMS = remember { mutableStateOf(0L) }
+        this.trackedAnimalDeathDateMS = remember { mutableStateOf(0L) }
+        this.trackedAnimalLifeSpanMS = remember { mutableStateOf(0L) }
     }
 
     fun recalculate() {
@@ -49,8 +89,25 @@ class Statistics {
         this.grassAmountMS.value = this.grassAmount
         this.animalsAmountMS.value = this.animals.size
 
+        if (deathDate == 0L && (trackedAnimal?.energy ?: 20) <= 0){
+            deathDate = this.number_of_day_lame-1
+            trackedAnimalDeathDateMS.value = deathDate
+            trackedAnimalLifeSpanMS.value = trackedAnimal!!.lifeSpan.toLong()
+        }
+        if (trackedAnimal != null){
+            trackedAnimalChildrenMS.value = trackedAnimal!!.amountOfChilds.toLong()
+            trackedAnimalAncestorsMS.value = trackedAnimal!!.amountOfAncestors.toLong()
+        }
+
         this.amountOfDeadAnimalsMS.value = this.amountOfDeadAnimals
 
+        if (animals.size != 0) {
+            this.avgNumberOfChildsMS.value =
+                (this.animals.sumOf { it.amountOfChilds }.toDouble() / this.animals.size.toDouble()).round(2)
+        }
+        else {
+            this.avgNumberOfChildsMS.value = 0.0
+        }
 
         val genotypeMap = mutableMapOf<Array<Int>, Int>()
 

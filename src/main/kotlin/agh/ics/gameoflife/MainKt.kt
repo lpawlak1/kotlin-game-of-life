@@ -14,15 +14,18 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
@@ -55,7 +58,7 @@ fun runSimulation(running: MutableState<Boolean>, time: Long, engine: IEngine, s
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun getGridView(engine: IEngine, opts: Options, squareView: Map<String, Painter>) {
+fun getGridView(engine: IEngine, opts: Options, squareView: Map<String, Painter>, running: MutableState<Boolean>) {
 
     Column(modifier = Modifier.size(((opts.height + 1) * 30).dp)) {
         val siz2 = opts.width + 1
@@ -68,7 +71,8 @@ fun getGridView(engine: IEngine, opts: Options, squareView: Map<String, Painter>
                     engine.map,
                     x,
                     y,
-                    engine.map.returnBackGroundColor(Vector2d(x, y))
+                    engine.map.returnBackGroundColor(Vector2d(x, y)),
+                    running
                 )
                 a.getView(squareView)
             }
@@ -77,6 +81,7 @@ fun getGridView(engine: IEngine, opts: Options, squareView: Map<String, Painter>
 }
 
 
+@OptIn(ExperimentalGraphicsApi::class)
 @Preview
 @Composable
 fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolean) {
@@ -120,15 +125,29 @@ fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolea
                 Text("Grass: " + staty.grassAmountMS.value.toString())
                 Text("Animals: " + staty.animalsAmountMS.value.toString())
                 Text("Avg of dead animal lifespan: " + staty.varDeadLifeSpanMS.value.toString())
-                Text("Avg of living animal energy: " + staty.varLivingEnergyMS.value.toString())
+                Text("Avg of living animals' energy: " + staty.varLivingEnergyMS.value.toString())
+                Text("Avg of living animals' children: " + staty.avgNumberOfChildsMS.value.toString())
                 Text("Dead by today: " + staty.amountOfDeadAnimalsMS.value.toString())
                 Text("Today: " + staty.numberOfDay.value.toString())
                 if (staty.maxGenotypeMS.value != "") {
                     Text("Max Genotype: \n ${staty.maxGenotypeMS.value}")
                     Text("Max Genotype amount: ${staty.maxGenotypeAmountMS.value}")
                 }
+                if(staty.trackedAnimal != null){
+                    Surface(color = Color.hsl(250.0F,0.37F,0.5F,1.0F), modifier = Modifier.padding(5.dp)) {
+                        Column{
+                            Text("Tracked animal statistics")
+                            Text("Children amount ${staty.trackedAnimalChildrenMS.value}")
+                            Text("Ancestors amount ${staty.trackedAnimalAncestorsMS.value}")
+                            if (staty.trackedAnimal!!.energy <= 0) {
+                                Text("Death date: ${staty.trackedAnimalDeathDateMS.value}")
+                                Text("Lifespan: ${staty.trackedAnimalLifeSpanMS.value}")
+                            }
+                        }
+                    }
+                }
             }
-            getGridView(engine, opts, squareView)
+            getGridView(engine, opts, squareView, running)
         }
     }
 }
