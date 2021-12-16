@@ -19,6 +19,7 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation(compose.desktop.currentOs)
+    implementation("de.brudaswen.kotlinx.serialization:kotlinx-serialization-csv:2.0.0")
 }
 
 tasks.test {
@@ -31,7 +32,7 @@ tasks.withType<KotlinCompile> {
 
 compose.desktop {
     application {
-        mainClass = "agh.ics.gameoflife.MainKtKt"
+        mainClass = "agh.ics.gameoflife.EntryViewKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "game_of_life"

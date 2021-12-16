@@ -125,7 +125,7 @@ abstract class AbstractWorldMap(
             }
 
         val listJungle = mutableListOf<Vector2d>()
-        val listStepee = mutableListOf<Vector2d>()
+        val listSteppe = mutableListOf<Vector2d>()
         for (i in 0..this.opts.width) {
             for (j in 0..this.opts.height) {
                 val vec = Vector2d(i, j)
@@ -133,37 +133,45 @@ abstract class AbstractWorldMap(
                     if (vec in this.jungle) {
                         listJungle.add(vec)
                     } else if (vec in this.steppe) {
-                        listStepee.add(vec)
+                        listSteppe.add(vec)
                     }
                 }
             }
         }
-        return getRandomGrassPosition(listJungle) to getRandomGrassPosition(listStepee)
+        return getRandomGrassPosition(listJungle) to getRandomGrassPosition(listSteppe)
     }
 
     override fun addRandomAnimals(value: Int) {
+        fun MutableList<Animal>.isVectorIn(vec: Vector2d): Boolean {
+            return this.any { it.position == vec }
+        }
+
         val animals: MutableList<Animal> = mutableListOf()
-        for (i in 1..value) {
+
+        var i = 1
+        do {
             val x = Random.nextInt(0, opts.width + 1)
             val y = Random.nextInt(0, opts.height + 1)
 
-            val animal = Animal(
-                Vector2d(x, y),
-                MapDirection.directionFactory(Random.nextInt(8)),
-                this.opts.startEnergy,
-                Animal.getRandomGenes()
-            )
+            if (!animals.isVectorIn(Vector2d(x, y))) {
+                val animal = Animal(
+                    Vector2d(x, y),
+                    MapDirection.directionFactory(Random.nextInt(8)),
+                    this.opts.startEnergy,
+                    Animal.getRandomGenes()
+                )
+                animals.add(animal)
 
-            animals.add(animal)
+                this.statistics.animals.add(animal)
 
-            this.statistics.animals.add(animal)
-
-        }
+                i++
+            }
+        } while (i <= value)
         addAnimals(animals)
     }
 
     override fun addGrass(): Int {
-        val (jungleVector, stepeeVector) = this.getGrassesToPlace()
+        val (jungleVector, steppeVector) = this.getGrassesToPlace()
 
         var ret = 0
 
@@ -172,8 +180,8 @@ abstract class AbstractWorldMap(
             ret++
         }
 
-        if (stepeeVector != null) {
-            this.objectsMap.getEverytime(stepeeVector, this).placeGrass()
+        if (steppeVector != null) {
+            this.objectsMap.getEverytime(steppeVector, this).placeGrass()
             ret++
         }
 

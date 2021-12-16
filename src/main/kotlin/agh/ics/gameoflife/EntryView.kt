@@ -22,95 +22,71 @@ import androidx.compose.ui.window.rememberWindowState
 import kotlin.math.sqrt
 
 class EntryView {
-    val intRegex = Regex("^[1-9][0-9]*$")
-    val junglRatioRegex = Regex("^0\\.[0-9]+$")
-
-    val widthField =
-        InputField(intRegex, "Width: ", { it.toInt() < 100 }, "Width has to be 0<x<100 and an Integer", null)
-    val heightField =
-        InputField(intRegex, "Height: ", { it.toInt() < 100 }, "Height has to be 0<x<100 and an Integer", null)
-    val startEnergyField = InputField(intRegex, "Start energy: ", { true }, "Start energy has to be an Integer", null)
-    val moveEnergyField = InputField(intRegex, "Move energy: ", { true }, "Move energy has to be an Integer", null)
-    val plantEnergyField = InputField(intRegex, "Plant energy: ", { true }, "Plant energy has to be an Integer", null)
-    val jungleRatioField = InputField(
-        junglRatioRegex,
-        "Jungle ratio: ",
-        { it.toDouble() < 1.00 },
-        "Jungle ratio has to be 0<x<1 and an Double with .",
-        null
-    )
+    private val intRegex = Regex("^[1-9][0-9]*$")
+    private val jungleRatioRegex = Regex("^0\\.[0-9]+$")
 
     var options: Options = Options.Default
+
+    private val inputMap = hashMapOf(
+        "width" to InputField(intRegex, "Width: ", { it.toInt() < 100 }, "be 0<x<100 and an Integer", options.width),
+        "height" to InputField(intRegex, "Height: ", { it.toInt() < 100 }, "0<x<100 and an Integer", options.height),
+        "startEnergy" to  InputField(intRegex, "Start energy: ", { true }, "Integer", options.startEnergy),
+        "moveEnergyField" to InputField(intRegex, "Move energy: ", { true }, "Integer", options.moveEnergy),
+        "plantEnergy" to InputField(intRegex, "Plant energy: ", { true }, "an Integer", options.plantEnergy),
+        "jungleRatio" to InputField(jungleRatioRegex, "Jungle ratio: ", { it.toDouble() < 1.00 }, "0<x<1 and an Double with .", options.jungleRatio)
+    )
 
     @OptIn(ExperimentalFoundationApi::class)
     @Preview
     @Composable
-    fun getView(nextShown: MutableState<Boolean>, options: MutableState<Options>) {
+    fun getView(nextShown: MutableState<Boolean>, options: List<MutableState<Options>>) {
 
-        widthField.init2()
-        heightField.init2()
-        startEnergyField.init2()
-        moveEnergyField.init2()
-        plantEnergyField.init2()
-        jungleRatioField.init2()
+        inputMap.values.forEach{it.init()}
 
-        lateinit var width: MutableState<String>
-        lateinit var height: MutableState<String>
-        lateinit var startEnergy: MutableState<String>
-        lateinit var moveEnergy: MutableState<String>
-        lateinit var plantEnergy: MutableState<String>
-        lateinit var jungleRatio: MutableState<String>
-        lateinit var checkedState: MutableState<Boolean>
-
-
+        lateinit var checkedState: List<MutableState<Boolean>>
 
         MaterialTheme {
-            with (Options.Default){
-                width = remember { mutableStateOf(this.width.toString()) }
-                height = remember { mutableStateOf(this.width.toString()) }
-                startEnergy = remember { mutableStateOf(this.startEnergy.toString()) }
-                moveEnergy = remember { mutableStateOf(this.moveEnergy.toString()) }
-                plantEnergy = remember { mutableStateOf(this.plantEnergy.toString()) }
-                jungleRatio = remember { mutableStateOf(this.jungleRatio.toString()) }
-                checkedState = remember { mutableStateOf(this.isMagicEngine) }
+            with(Options.Default) {
+                checkedState = listOf(
+                    remember { mutableStateOf(this.isMagicEngine) },
+                    remember { mutableStateOf(this.isMagicEngine) }
+                )
             }
             Column {
-                widthField.value = width
-                widthField.getView()
 
-                heightField.value = height
-                heightField.getView()
+                for (inputField in inputMap.values){
+                    inputField.getView()
+                }
 
-                startEnergyField.value = startEnergy
-                startEnergyField.getView()
-
-                moveEnergyField.value = moveEnergy
-                moveEnergyField.getView()
-
-                plantEnergyField.value = plantEnergy
-                plantEnergyField.getView()
-
-                jungleRatioField.value = jungleRatio
-                jungleRatioField.getView()
-
-                Row{
-                    Checkbox(
-                        checked = checkedState.value,
-                        onCheckedChange = { checkedState.value = it }
-                    )
-                    Text("Czy silnik ma być magiczny?")
+                for ((index, checkedStateValue) in checkedState.withIndex()){
+                    Row {
+                        Checkbox(
+                            checked = checkedStateValue.value,
+                            onCheckedChange = { checkedStateValue.value = it }
+                        )
+                        Text("Czy silnik mapy nr ${index+1} ma być magiczny?")
+                    }
                 }
 
                 Button(onClick = {
-                    if(widthField.noErrors.value && heightField.noErrors.value && startEnergyField.noErrors.value && moveEnergyField.noErrors.value && plantEnergyField.noErrors.value && jungleRatioField.noErrors.value){
+                    if (inputMap.values.none{ it.noErrors.value }) {
+                        for ((index, option) in options.withIndex()){
+                            option.value = Options(
+                                width = inputMap["width"]!!.value.value.toInt(),
+                                height = inputMap["height"]!!.value.value.toInt(),
+                                startEnergy = inputMap["startEnergy"]!!.value.value.toInt(),
+                                moveEnergy = inputMap["moveEnergy"]!!.value.value.toInt(),
+                                plantEnergy = inputMap["plantEnergy"]!!.value.value.toInt(),
+                                jungleRatio = inputMap["jungleRatio"]!!.value.value.toDouble(),
+                                checkedState[index].value
+                            )
+                        }
                         nextShown.value = true
-                        options.value = Options(width.value.toInt(), height.value.toInt(), startEnergy.value.toInt(), moveEnergy.value.toInt(), plantEnergy.value.toInt(), jungleRatio.value.toDouble(), checkedState.value)
                     }
-                }){
-                    if(widthField.noErrors.value && heightField.noErrors.value && startEnergyField.noErrors.value && moveEnergyField.noErrors.value && plantEnergyField.noErrors.value && jungleRatioField.noErrors.value){
+                }) {
+                    if (inputMap.values.none { it.noErrors.value }){
                         Text("Dalej")
-                    }
-                    else{
+                    } else {
                         Text("Plis popraw błędy")
                     }
                 }
@@ -126,21 +102,28 @@ fun main() =
     application {
         val entryView = EntryView()
         val nextShown = remember { mutableStateOf(false) }
-        val opts = remember { mutableStateOf(Options(0,0,0,0,0,0.0, true)) }
+        val optsList = listOf(
+            remember { mutableStateOf(Options.Default) },
+            remember { mutableStateOf(Options.Default) }
+        )
+
         if (!nextShown.value) {
             Window(
                 onCloseRequest = ::exitApplication,
-                title = "Input entry values",
+                title = "Enter entry values",
                 state = rememberWindowState(
                     position = WindowPosition(alignment = Alignment.Center),
                 )
             ) {
-                entryView.getView(nextShown, opts)
+                entryView.getView(nextShown, optsList)
             }
-        }
-        else if (nextShown.value){
-            val opts2 = opts.value.copy(width = opts.value.width-1, height = opts.value.height-1, jungleRatio = sqrt(opts.value.jungleRatio))
-            siema.run(opts2)
+        } else if (nextShown.value) {
+            val optsCopyList = optsList.map {
+                it.value.copy(width = it.value.width - 1,
+                    height = it.value.height - 1,
+                    jungleRatio = sqrt(it.value.jungleRatio))
+            }
+            siema.run(optsCopyList)
         }
 
     }

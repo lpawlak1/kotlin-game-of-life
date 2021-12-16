@@ -14,17 +14,25 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 
 class InputField(
-    val regex: Regex,
-    val name: String,
+    private val regex: Regex,
+    private val name: String,
     val check: (value: String) -> Boolean,
-    val errorMessage: String,
-    var value: MutableState<String>?
+    private val errorMessageEnding: String,
+    private val default: Any
 ) {
     lateinit var noErrors: MutableState<Boolean>
+    lateinit var value: MutableState<String>
+
+    private val errorMessage = buildString {
+        this.append(name)
+        this.append(" has to be ")
+        this.append(errorMessageEnding)
+    }
 
     @Composable
-    fun init2(){
+    fun init() {
         noErrors = remember { mutableStateOf(true) }
+        value = remember { mutableStateOf("$default") }
     }
 
     @Composable
@@ -32,11 +40,11 @@ class InputField(
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(name, textAlign = TextAlign.Left)
-                TextField(value!!.value, {
-                    value!!.value = it
+                TextField(value.value, {
+                    value.value = it
                 })
             }
-            if (!regex.matches(value!!.value) || !check(value!!.value)) {
+            if (!regex.matches(value.value) || !check(value.value)) {
                 Text(errorMessage, style = TextStyle(Color.Red))
                 noErrors.value = false
             } else {

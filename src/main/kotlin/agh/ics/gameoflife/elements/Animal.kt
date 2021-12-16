@@ -23,6 +23,7 @@ class Animal(
     var map: IWorldMap? = null
 ) : AbstractElement(position) {
 
+
     /**
      * shows when last move of animal took place [agh.ics.gameoflife.engine.IEngine]
      */
@@ -39,7 +40,7 @@ class Animal(
 
     var isTracked: Boolean = false
 
-    var amountOfChilds: Int = 0
+    var amountOfChildren: Int = 0
 
     var isAncestorFromTracked: Boolean = false
     var trackedParent: Animal? = null
@@ -140,15 +141,20 @@ class Animal(
         return energy
     }
 
+    fun copy(): Animal {
+        val (x, y) = this.position
+        val genesCopy = this.genes.copyOf()
+        return Animal(Vector2d(x, y), this.direction, this.map!!.opts.startEnergy, genesCopy, this.map)
+    }
 
     companion object {
         fun getRandomGenes(): Array<Int> {
             val arr = Array(32) { 0 }
-            for (i in 0 until 8){
+            for (i in 0 until 8) {
                 arr[i] = i
             }
             for (i in 8..32) {
-                arr[i - 1] = Random.nextInt(0,8)
+                arr[i - 1] = Random.nextInt(0, 8)
             }
             arr.sort()
             return arr
@@ -159,25 +165,27 @@ class Animal(
             val childEnergy = (first.getChildEnergy() + second.getChildEnergy()).toInt()
             val childPosition = first.position
 
-            first.amountOfChilds++
-            second.amountOfChilds++
+            first.amountOfChildren++
+            second.amountOfChildren++
 
-            with (Animal(
-                childPosition,
-                MapDirection.directionFactory(Random.Default.nextInt(8)),
-                childEnergy,
-                genes,
-                first.map
-            )){
-                for (elem in listOf(first,second)){
-                    if (elem.isAncestorFromTracked ){
+            with(
+                Animal(
+                    childPosition,
+                    MapDirection.directionFactory(Random.Default.nextInt(8)),
+                    childEnergy,
+                    genes,
+                    first.map
+                )
+            ) {
+                for (elem in listOf(first, second)) {
+                    if (elem.isAncestorFromTracked) {
                         this.isAncestorFromTracked = true
-                        elem.trackedParent!!.amountOfAncestors  += 1
-                        this.trackedParent = elem.trackedParent?:elem
+                        elem.trackedParent!!.amountOfAncestors += 1
+                        this.trackedParent = elem.trackedParent ?: elem
                         break
-                    } else if (elem.isTracked){
+                    } else if (elem.isTracked) {
                         this.isAncestorFromTracked = true
-                        elem.amountOfAncestors  += 1
+                        elem.amountOfAncestors += 1
                         this.trackedParent = elem
                         break
                     }
