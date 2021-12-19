@@ -31,7 +31,6 @@ internal fun HashMap<Vector2d, Square>.removeNullSquares() {
 
 
 abstract class AbstractWorldMap(
-    animals: List<Animal>,
     final override var statistics: Statistics,
     final override var opts: Options
 ) : IWorldMap {
@@ -45,13 +44,6 @@ abstract class AbstractWorldMap(
     private val mutableStates =
         Array(opts.width + 1) { Array(opts.height + 1) { mutableStateOf(MutableWorldElement.Default) } }
 
-
-    init {
-        for (animal in animals) {
-            this.objectsMap.getEverytime(animal.position, this).place(animal)
-            this.statistics.animals.add(animal)
-        }
-    }
 
     override fun returnBackGroundColor(position: Vector2d): Color {
         return if (position in jungle) jungle.retColor()

@@ -6,13 +6,12 @@ import agh.ics.gameoflife.statistics.Options
 import agh.ics.gameoflife.statistics.Statistics
 
 class WrappedWorldMap(
-    val animals: List<Animal>,
     statistics: Statistics,
     opts: Options
-) : AbstractWorldMap(animals, statistics, opts) {
+) : AbstractWorldMap(statistics, opts) {
 
     init {
-        this.animals.forEach { it.map = this }
+        statistics.map = this
     }
 
     override fun translateVector(position: Vector2d, oldPosition: Vector2d): Pair<Vector2d, Boolean> {

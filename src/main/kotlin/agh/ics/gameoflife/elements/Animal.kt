@@ -177,20 +177,19 @@ class Animal(
                     first.map
                 )
             ) {
+                var trackedParent: Animal? = null
                 for (elem in listOf(first, second)) {
-                    if (elem.isAncestorFromTracked) {
-                        this.isAncestorFromTracked = true
-                        elem.trackedParent!!.amountOfAncestors += 1
-                        this.trackedParent = elem.trackedParent ?: elem
-                        break
-                    } else if (elem.isTracked) {
-                        this.isAncestorFromTracked = true
-                        elem.amountOfAncestors += 1
-                        this.trackedParent = elem
+                    if (elem.isAncestorFromTracked || elem.isTracked) {
+                        trackedParent = elem.trackedParent ?: elem
                         break
                     }
                 }
-                return this
+                if (trackedParent != null){
+                    this.isAncestorFromTracked = true
+                    this.trackedParent = trackedParent
+                    trackedParent.amountOfAncestors += 1
+                }
+                return@breed this
             }
         }
 

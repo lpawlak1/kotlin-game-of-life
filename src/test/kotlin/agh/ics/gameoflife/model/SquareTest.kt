@@ -168,11 +168,11 @@ internal class SquareTest {
         square.place(Animal(Vector2d(1,3), life = 50, genes=Array(32){0}))
         square.place(Animal(Vector2d(1,3), life = 150, genes=Array(32){4}))
         square.breed(40)
-        val parent_a = square.pollBiggestAnimal()!!
+        val parent_a = square.pollBiggestAnimal()
         assertEquals(parent_a.energy, (150- (150*0.25).toInt()).toInt())
-        val child = square.pollBiggestAnimal()!!
+        val child = square.pollBiggestAnimal()
         assertEquals(50, child.energy)
-        val parent_b = square.pollBiggestAnimal()!!
+        val parent_b = square.pollBiggestAnimal()
         assertEquals(parent_b.energy, (50- (50*0.25).toInt()))
     }
 

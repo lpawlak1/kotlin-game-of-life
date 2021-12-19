@@ -30,8 +30,8 @@ class EntryView {
     private val inputMap = hashMapOf(
         "width" to InputField(intRegex, "Width: ", { it.toInt() < 100 }, "be 0<x<100 and an Integer", options.width),
         "height" to InputField(intRegex, "Height: ", { it.toInt() < 100 }, "0<x<100 and an Integer", options.height),
-        "startEnergy" to  InputField(intRegex, "Start energy: ", { true }, "Integer", options.startEnergy),
-        "moveEnergyField" to InputField(intRegex, "Move energy: ", { true }, "Integer", options.moveEnergy),
+        "startEnergy" to InputField(intRegex, "Start energy: ", { true }, "Integer", options.startEnergy),
+        "moveEnergy" to InputField(intRegex, "Move energy: ", { true }, "Integer", options.moveEnergy),
         "plantEnergy" to InputField(intRegex, "Plant energy: ", { true }, "an Integer", options.plantEnergy),
         "jungleRatio" to InputField(jungleRatioRegex, "Jungle ratio: ", { it.toDouble() < 1.00 }, "0<x<1 and an Double with .", options.jungleRatio)
     )
@@ -41,7 +41,7 @@ class EntryView {
     @Composable
     fun getView(nextShown: MutableState<Boolean>, options: List<MutableState<Options>>) {
 
-        inputMap.values.forEach{it.init()}
+        inputMap.values.forEach { it.init() }
 
         lateinit var checkedState: List<MutableState<Boolean>>
 
@@ -54,23 +54,23 @@ class EntryView {
             }
             Column {
 
-                for (inputField in inputMap.values){
+                for (inputField in inputMap.values) {
                     inputField.getView()
                 }
 
-                for ((index, checkedStateValue) in checkedState.withIndex()){
+                for ((index, checkedStateValue) in checkedState.withIndex()) {
                     Row {
                         Checkbox(
                             checked = checkedStateValue.value,
                             onCheckedChange = { checkedStateValue.value = it }
                         )
-                        Text("Czy silnik mapy nr ${index+1} ma być magiczny?")
+                        Text("Czy silnik mapy nr ${index + 1} ma być magiczny?")
                     }
                 }
 
                 Button(onClick = {
-                    if (inputMap.values.none{ it.noErrors.value }) {
-                        for ((index, option) in options.withIndex()){
+                    if (inputMap.values.all { it.noErrors.value }) {
+                        for ((index, option) in options.withIndex()) {
                             option.value = Options(
                                 width = inputMap["width"]!!.value.value.toInt(),
                                 height = inputMap["height"]!!.value.value.toInt(),
@@ -84,7 +84,7 @@ class EntryView {
                         nextShown.value = true
                     }
                 }) {
-                    if (inputMap.values.none { it.noErrors.value }){
+                    if (inputMap.values.all { it.noErrors.value }) {
                         Text("Dalej")
                     } else {
                         Text("Plis popraw błędy")
@@ -119,11 +119,13 @@ fun main() =
             }
         } else if (nextShown.value) {
             val optsCopyList = optsList.map {
-                it.value.copy(width = it.value.width - 1,
+                it.value.copy(
+                    width = it.value.width - 1,
                     height = it.value.height - 1,
-                    jungleRatio = sqrt(it.value.jungleRatio))
+                    jungleRatio = sqrt(it.value.jungleRatio)
+                )
             }
-            siema.run(optsCopyList)
+            run(optsCopyList)
         }
 
     }

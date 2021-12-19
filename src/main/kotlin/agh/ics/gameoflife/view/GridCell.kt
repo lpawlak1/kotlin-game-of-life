@@ -38,7 +38,7 @@ class GridCell(
     @Composable
     fun getView(painters: Map<String, Painter>) {
         Surface(color = background) {
-            if (topObject.value.classe is Animal) {
+            if (topObject.value.classed is Animal) {
                 if (running.value) {
                     getAnimalImage(painters[topObject.value.getName()]!!)
                 } else {
@@ -48,7 +48,7 @@ class GridCell(
                             shape = RoundedCornerShape(5),
                             modifier = Modifier.padding(20.dp)
                         ) {
-                            val animal = topObject.value.classe as Animal
+                            val animal = topObject.value.classed as Animal
                             Column {
                                 Text("Energy: ${animal.energy}")
                                 Text("Life span: ${animal.lifeSpan}")
@@ -93,13 +93,13 @@ class GridCell(
                 Color.hsl(
                     0.0F,
                     max(
-                        min(1.0F, ((topObject.value.classe as Animal).energy.toFloat() / 100.0F)),
+                        min(1.0F, ((topObject.value.classed as Animal).energy.toFloat() / 100.0F)),
                         0.1F
                     ), 0.5F
                 )
             ),
             modifier = Modifier.fillMaxSize()
-                .graphicsLayer(rotationZ = 45.0F * (topObject.value.classe as Animal).direction.`val`)
+                .graphicsLayer(rotationZ = 45.0F * (topObject.value.classed as Animal).direction.`val`)
         )
     }
 }
