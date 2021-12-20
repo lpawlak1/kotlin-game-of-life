@@ -13,16 +13,14 @@ import agh.ics.gameoflife.statistics.Statistics
 import agh.ics.gameoflife.view.GridCell
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.graphics.painter.Painter
@@ -71,7 +69,10 @@ fun runSimulation(running: MutableState<Boolean>, time: Long, engine: IEngine, s
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun getGridView(engine: IEngine, opts: Options, squareView: Map<String, Painter>, running: MutableState<Boolean>) {
-    Column(modifier = Modifier.size(((opts.height + 1) * 30).dp)) {
+    Column(modifier = Modifier.size(((opts.height + 1) * 30).dp),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.End)
+    {
         val siz2 = opts.width + 1
         LazyVerticalGrid(cells = GridCells.Fixed(siz2)) {
             items(siz2 * (opts.height + 1)) {
@@ -119,20 +120,19 @@ fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolea
     val squareView = SquareView.views()
 
     MaterialTheme {
-        Row(modifier = Modifier.padding(20.dp)) {
+        Row(modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            getGridView(engine, opts, squareView, running)
             Column {
                 Button(
                     onClick = {
                         running.value = !running.value
                     }) {
-
-                    val start = "Start"
-                    val stop = "Stop"
-                    Text("${if (running.value) stop else start} simulation")
+                    Text((if (running.value) "Stop" else "Start") + "simulation")
                 }
                 statistics.getView(engine)
             }
-            getGridView(engine, opts, squareView, running)
         }
     }
 }
