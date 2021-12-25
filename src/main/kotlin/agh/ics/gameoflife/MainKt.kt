@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,11 +34,9 @@ import kotlinx.coroutines.runBlocking
 import java.lang.Thread.sleep
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.system.measureTimeMillis
 
 
-fun runSimulation(running: MutableState<Boolean>, time: Long, engine: IEngine, statistics: Statistics) {
-    var info: Long = 0
+fun runSimulation(running: MutableState<Boolean>, time: MutableState<Int>, engine: IEngine, statistics: Statistics) {
     val fileName = buildString {
         this.append("sim")
         this.append(if (engine is MagicEngine) "Magic" else "Plain")
@@ -46,21 +45,18 @@ fun runSimulation(running: MutableState<Boolean>, time: Long, engine: IEngine, s
         this.append(".csv")
     }
 
+    sleep(50)
+
     while (true) {
-        if (time - info > 0) {
-            sleep(time - info)
+        sleep(time.value.toLong())
+
+        if (running.value) {
+            engine.runIteration()
+            statistics.recalculate()
         } else {
-            sleep(10)
-        }
-        info = measureTimeMillis {
-            if (running.value) {
-                engine.runIteration()
-                statistics.recalculate()
-            } else {
-                if (statistics.dataList.isNotEmpty()) {
-                    CsvWriter.flush(fileName, statistics.dataList)
-                    statistics.dataList = mutableListOf()
-                }
+            if (statistics.dataList.isNotEmpty()) {
+                CsvWriter.flush(fileName, statistics.dataList)
+                statistics.dataList = mutableListOf()
             }
         }
     }
@@ -93,7 +89,7 @@ fun getGridView(engine: IEngine, opts: Options, squareView: Map<String, Painter>
 @OptIn(ExperimentalGraphicsApi::class)
 @Preview
 @Composable
-fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolean) {
+fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolean, sleepTime: MutableState<Int>) {
     val statistics = Statistics()
 
     val map = if (isWrapped) {
@@ -114,7 +110,7 @@ fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolea
     statistics.recalculate()
 
     CoroutineScope(Dispatchers.Default).launch {
-        runSimulation(running, 30, engine, statistics)
+        runSimulation(running, sleepTime, engine, statistics)
     }
 
     val squareView = SquareView.views()
@@ -135,6 +131,28 @@ fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolea
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun timeSlider(timeValue: MutableState<Int>){
+    val sliderPosition = remember { mutableStateOf(0.0f) }
+    Column{
+        Text("${timeValue.value}", modifier = Modifier.align(Alignment.Start))
+        Slider(sliderPosition.value,{
+            timeValue.value = calculateTime(it)
+            sliderPosition.value = it
+        })
+    }
+}
+
+fun calculateTime(input: Float): Int{
+    val outputStart = 16.0f
+    val outputEnd = 500.0F
+    val (inputStart, inputEnd) = 0.0f to 1.0f
+
+    val output = outputStart + ((outputEnd - outputStart) / (inputEnd - inputStart)) * (input - inputStart)
+    return output.toInt()
 }
 
 @Composable
@@ -168,7 +186,11 @@ fun run(opts: List<Options>) {
 @Composable
 private fun MyWindow(state: () -> Unit, running: MutableState<Boolean>, opts: Options, isWrapped: Boolean) =
     Window(onCloseRequest = state, title = if (isWrapped) "Wrapped map" else "Walled map") {
-        getMainView(running, opts, isWrapped)
+        Column{
+            val sleepTime = remember{mutableStateOf(calculateTime(0.0f))}
+            getMainView(running, opts, isWrapped, sleepTime)
+            timeSlider(sleepTime)
+        }
     }
 
 private class MyApplicationState(vararg running: MutableState<Boolean>) {
