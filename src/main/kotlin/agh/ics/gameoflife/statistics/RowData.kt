@@ -1,14 +1,14 @@
 package agh.ics.gameoflife.statistics
 
-data class RowData(
+class RowData(
     val day: Long,
     val animalsAmount: Int,
     val grassAmount: Int,
-    val varEnergy: Double,
-    val varDeadLifeSpan: Double,
-    val varLivingChild: Double
+    val avgEnergy: Double,
+    val avgDeadLifeSpan: Double,
+    val avgLivingChild: Double
 ) {
     override fun toString(): String {
-        return "$day,$animalsAmount,$grassAmount,$varEnergy,$varDeadLifeSpan,$varLivingChild\n"
+        return "$day,$animalsAmount,$grassAmount,$avgEnergy,$avgDeadLifeSpan,$avgLivingChild\n"
     }
 }
