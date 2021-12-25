@@ -1,3 +1,5 @@
+@file:Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+
 package agh.ics.gameoflife
 
 import agh.ics.gameoflife.engine.IEngine

@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.unit.dp
 
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 class Statistics {
     private lateinit var isAnimalTracked: MutableState<Boolean>
     lateinit var map: IWorldMap
