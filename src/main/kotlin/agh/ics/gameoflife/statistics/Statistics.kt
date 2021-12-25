@@ -19,12 +19,12 @@ import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.unit.dp
 
 class Statistics {
-    lateinit var isAnimalTracked: MutableState<Boolean>
+    private lateinit var isAnimalTracked: MutableState<Boolean>
     lateinit var map: IWorldMap
 
-    lateinit var genotypeStringMS: MutableState<String>
+    private lateinit var genotypeStringMS: MutableState<String>
 
-    var tableList = mutableStateListOf<RowData>()
+    private var tableList = mutableStateListOf<RowData>()
     var dataList = mutableListOf<RowData>()
 
     var sumOfDeadLifeSpan: Long = 0
@@ -33,12 +33,12 @@ class Statistics {
     private var numberOfDayLame = 0L
 
     var animals: MutableList<Animal> = mutableListOf()
-    var avgChildren: Double = 0.0
+    private var avgChildren: Double = 0.0
 
     var grassAmount: Int = 0
 
 
-    var deathDate: Long = 0L
+    private var deathDate: Long = 0L
     var trackedAnimal: Animal? = null
         set(value) {
             field?.isTracked = false
@@ -64,10 +64,10 @@ class Statistics {
         }
 
 
-    lateinit var trackedAnimalChildrenMS: MutableState<Long>
-    lateinit var trackedAnimalAncestorsMS: MutableState<Long>
-    lateinit var trackedAnimalDeathDateMS: MutableState<Long>
-    lateinit var trackedAnimalLifeSpanMS: MutableState<Long>
+    private lateinit var trackedAnimalChildrenMS: MutableState<Long>
+    private lateinit var trackedAnimalAncestorsMS: MutableState<Long>
+    private lateinit var trackedAnimalDeathDateMS: MutableState<Long>
+    private lateinit var trackedAnimalLifeSpanMS: MutableState<Long>
 
     @Composable
     fun init() {
@@ -85,9 +85,9 @@ class Statistics {
 
         calcTrackedAnimal()
 
-        calcAvgChildren()
+        this.avgChildren = calcAvgChildren()
 
-        val (genotypeStr, _) = calcGenotypes()
+        val genotypeStr = calcGenotypes()
         this.genotypeStringMS.value = genotypeStr
 
         val avgLivingEnergy = calcAvgLivingAnimalEnergy()
@@ -110,15 +110,7 @@ class Statistics {
 
     @OptIn(ExperimentalGraphicsApi::class)
     @Composable
-    fun getStaticView(engine: IEngine) {
-
-        if (engine is MagicEngine) {
-            if (engine.rescueTimes != engine.counter.value)
-                Text("Pozostało: ${engine.rescueTimes - engine.counter.value} ratunków")
-            else
-                Text("Wykorzystano wszystkie ratunki")
-        }
-
+    fun getStaticView() {
         if (this.isAnimalTracked.value) {
             Surface(color = Color.hsl(250.0F, 0.37F, 0.5F, 1.0F)) {
                 Column {
@@ -132,13 +124,26 @@ class Statistics {
                 }
             }
         } else {
-            Text("Żaden animal nie jets trackowany")
+            Text("Żaden animal nie jets obserwowany")
         }
 
-        Text(this.genotypeStringMS.value)
+        if (this.genotypeStringMS.value != "") {
+            Text("Dominanta z genotypu:")
+            Text(this.genotypeStringMS.value)
+        }
+    }
 
+    @OptIn(ExperimentalGraphicsApi::class)
+    @Composable
+    fun getLeftStatisticsView(engine: IEngine) {
+        if (engine is MagicEngine) {
+            if (engine.rescueTimes != engine.counter.value)
+                Text("Pozostało: ${engine.rescueTimes - engine.counter.value} ratunków")
+            else
+                Text("Wykorzystano wszystkie ratunki")
+        }
         Text(
-            "Legenda:\n" +
+            "Legenda tabeli:\n" +
                     "- Numer epoki\n" +
                     "- Ilość żywych zwierząt\n" +
                     "- Ilość trawy na mapie\n" +
@@ -146,6 +151,7 @@ class Statistics {
                     "- Średnia długość życia do śmierci\n" +
                     "- Średnia ilość dzieci\n"
         )
+
     }
 
     @OptIn(ExperimentalGraphicsApi::class)
@@ -155,7 +161,7 @@ class Statistics {
         Box {
 
             val column2Weight = 1.0f / 6.0f // 100%/6
-            LazyColumn(Modifier.fillMaxWidth().fillMaxHeight(), state = scrollbarState) {
+            LazyColumn(Modifier.fillMaxWidth().fillMaxHeight(0.97f), state = scrollbarState) {
                 items(tableList.size) { index ->
                     val data = tableList[tableList.size - 1 - index]
                     Row(Modifier.fillMaxWidth().height(20.dp)) {
@@ -188,51 +194,43 @@ class Statistics {
         }
     }
 
-    private fun calcAvgChildren() {
-        this.avgChildren =
-            if (animals.size != 0) {
-                (this.animals.sumOf { it.amountOfChildren }.toDouble() / this.animals.size.toDouble())
-                    .round(2)
-            } else {
-                0.0
-            }
-    }
+    private fun calcAvgChildren(): Double =
+        if (animals.size != 0) {
+            (this.animals.sumOf { it.amountOfChildren }.toDouble() / this.animals.size.toDouble())
+                .round(2)
+        } else {
+            0.0
+        }
 
-    private fun calcGenotypes(): Pair<String, Int> {
+    private fun calcGenotypes(): String {
         val genotypeMap = mutableMapOf<String, Pair<Array<Int>, Int>>()
         animals.forEach {
             val key = it.genes.contentDeepToString()
             genotypeMap.putIfAbsent(key, it.genes to 0)
             genotypeMap[key] = genotypeMap[key]!!.component1() to genotypeMap[key]!!.component2() + 1
         }
-        var (maxGenotype, maxAmount) = Pair("-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-", 0)
+        var maxGenotype = "-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-"
         val mapEntry = genotypeMap.maxByOrNull { it.value.component2() }
         if (mapEntry != null && mapEntry.component2().component2() > 1) {
             maxGenotype = mapEntry.component1().replace(" ", "")
             maxGenotype = maxGenotype.replace("[", "").replace("]", "")
-            maxAmount = mapEntry.component2().component2()
         }
-        return maxGenotype to maxAmount
+        return maxGenotype
     }
 
-    private fun calcAvgLivingAnimalEnergy(): Long {
-        val avgLivingEnergy: Long = if (this.animals.isNotEmpty()) {
+    private fun calcAvgLivingAnimalEnergy(): Long =
+        if (this.animals.isNotEmpty()) {
             this.animals.sumOf { it.energy.toLong() } / this.animals.size.toLong()
         } else {
             0L
         }
-        return avgLivingEnergy
-    }
 
-    private fun calcAvgDeadAnimalLifeSpan(): Long {
-        val avgDeadAnimalLifeSpan: Long =
-            if (this.amountOfDeadAnimals != 0L) {
-                this.sumOfDeadLifeSpan / amountOfDeadAnimals
-            } else {
-                0L
-            }
-        return avgDeadAnimalLifeSpan
-    }
+    private fun calcAvgDeadAnimalLifeSpan(): Long =
+        if (this.amountOfDeadAnimals != 0L) {
+            this.sumOfDeadLifeSpan / amountOfDeadAnimals
+        } else {
+            0L
+        }
 }
 
 private fun Double.round(decimals: Int): Double {

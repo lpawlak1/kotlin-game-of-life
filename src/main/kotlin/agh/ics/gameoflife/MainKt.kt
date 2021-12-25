@@ -13,6 +13,7 @@ import agh.ics.gameoflife.statistics.Statistics
 import agh.ics.gameoflife.view.GridCell
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
@@ -22,6 +23,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
@@ -69,9 +71,11 @@ fun runSimulation(running: MutableState<Boolean>, time: Long, engine: IEngine, s
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun getGridView(engine: IEngine, opts: Options, squareView: Map<String, Painter>, running: MutableState<Boolean>) {
-    Column(modifier = Modifier.size(((opts.height + 1) * 48).dp),
+    Column(
+        modifier = Modifier.size(((opts.height + 1) * 30).dp),
         verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.Start)
+        horizontalAlignment = Alignment.Start
+    )
     {
         val siz2 = opts.width + 1
         LazyVerticalGrid(cells = GridCells.Fixed(siz2)) {
@@ -120,21 +124,26 @@ fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolea
     val squareView = SquareView.views()
 
     MaterialTheme {
-        Row(modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Column{
-                getGridView(engine, opts, squareView, running)
-                statistics.getStaticView(engine)
-            }
-            Column {
-                Button(
-                    onClick = {
-                        running.value = !running.value
-                    }) {
-                    Text((if (running.value) "Stop" else "Start") + " simulation")
+        Column {
+            statistics.getStaticView()
+            Row(
+                modifier = Modifier.padding(5.dp).border(3.dp, Color.Black),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                Column {
+                    getGridView(engine, opts, squareView, running)
+                    statistics.getLeftStatisticsView(engine)
                 }
-                statistics.getTableView()
+                Column {
+                    Button(
+                        onClick = {
+                            running.value = !running.value
+                        }) {
+                        Text((if (running.value) "Stop" else "Start") + " simulation")
+                    }
+                    statistics.getTableView()
+                }
             }
         }
     }
