@@ -69,9 +69,9 @@ fun runSimulation(running: MutableState<Boolean>, time: Long, engine: IEngine, s
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun getGridView(engine: IEngine, opts: Options, squareView: Map<String, Painter>, running: MutableState<Boolean>) {
-    Column(modifier = Modifier.size(((opts.height + 1) * 30).dp),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.End)
+    Column(modifier = Modifier.size(((opts.height + 1) * 48).dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start)
     {
         val siz2 = opts.width + 1
         LazyVerticalGrid(cells = GridCells.Fixed(siz2)) {
@@ -123,15 +123,18 @@ fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolea
         Row(modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            getGridView(engine, opts, squareView, running)
+            Column{
+                getGridView(engine, opts, squareView, running)
+                statistics.getStaticView(engine)
+            }
             Column {
                 Button(
                     onClick = {
                         running.value = !running.value
                     }) {
-                    Text((if (running.value) "Stop" else "Start") + "simulation")
+                    Text((if (running.value) "Stop" else "Start") + " simulation")
                 }
-                statistics.getView(engine)
+                statistics.getTableView()
             }
         }
     }

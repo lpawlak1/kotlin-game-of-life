@@ -4,28 +4,28 @@ import agh.ics.gameoflife.elements.Animal
 import agh.ics.gameoflife.engine.IEngine
 import agh.ics.gameoflife.engine.MagicEngine
 import agh.ics.gameoflife.map.IWorldMap
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
+import androidx.compose.ui.unit.dp
 
 class Statistics {
+    lateinit var isAnimalTracked: MutableState<Boolean>
     lateinit var map: IWorldMap
 
-    private lateinit var amountOfDeadAnimalsMS: MutableState<Long>
-    private lateinit var grassAmountMS: MutableState<Int>
-    private lateinit var animalsAmountMS: MutableState<Int>
-    private lateinit var avgDeadLifeSpanMS: MutableState<Long>
-    private lateinit var avgLivingEnergyMS: MutableState<Long>
-    private lateinit var numberOfDay: MutableState<Long>
-    private lateinit var maxGenotypeMS: MutableState<String>
-    private lateinit var maxGenotypeAmountMS: MutableState<Int>
-    private lateinit var avgNumberOfChildrenMS: MutableState<Double>
+    lateinit var genotypeStringMS: MutableState<String>
+
+    var tableList = mutableStateListOf<RowData>()
+    var dataList = mutableListOf<RowData>()
 
     var sumOfDeadLifeSpan: Long = 0
     var amountOfDeadAnimals: Long = 0
@@ -37,7 +37,6 @@ class Statistics {
 
     var grassAmount: Int = 0
 
-    var dataList = mutableListOf<RowData>()
 
     var deathDate: Long = 0L
     var trackedAnimal: Animal? = null
@@ -60,6 +59,8 @@ class Statistics {
             trackedAnimalLifeSpanMS.value = 0L
 
             field = value
+
+            this.isAnimalTracked.value = true
         }
 
 
@@ -70,75 +71,55 @@ class Statistics {
 
     @Composable
     fun init() {
-        this.numberOfDay = remember { mutableStateOf(0) }
-        this.grassAmountMS = remember { mutableStateOf(0) }
-        this.animalsAmountMS = remember { mutableStateOf(0) }
-        this.avgDeadLifeSpanMS = remember { mutableStateOf(0L) }
-        this.avgLivingEnergyMS = remember { mutableStateOf(0L) }
-        this.amountOfDeadAnimalsMS = remember { mutableStateOf(0L) }
-        this.maxGenotypeMS = remember { mutableStateOf("") }
-        this.maxGenotypeAmountMS = remember { mutableStateOf(0) }
-        this.avgNumberOfChildrenMS = remember { mutableStateOf(0.0) }
-
         this.trackedAnimalChildrenMS = remember { mutableStateOf(0L) }
         this.trackedAnimalAncestorsMS = remember { mutableStateOf(0L) }
         this.trackedAnimalDeathDateMS = remember { mutableStateOf(0L) }
         this.trackedAnimalLifeSpanMS = remember { mutableStateOf(0L) }
+        this.genotypeStringMS = remember { mutableStateOf("") }
+
+        this.isAnimalTracked = mutableStateOf(false)
     }
 
     fun recalculate() {
         this.numberOfDayLame++
 
-        this.numberOfDay.value = this.numberOfDayLame
-
-        this.grassAmountMS.value = this.grassAmount
-        this.animalsAmountMS.value = this.animals.size
-        this.amountOfDeadAnimalsMS.value = this.amountOfDeadAnimals
-
         calcTrackedAnimal()
 
         calcAvgChildren()
 
-        calcGenotypes()
+        val (genotypeStr, _) = calcGenotypes()
+        this.genotypeStringMS.value = genotypeStr
 
         val avgLivingEnergy = calcAvgLivingAnimalEnergy()
 
         val avgDeadAnimalLifeSpan = calcAvgDeadAnimalLifeSpan()
 
-        dataList.add(
-            RowData(
-                this.numberOfDayLame,
-                this.animals.size,
-                this.grassAmount,
-                avgLivingEnergy.toDouble(),
-                avgDeadAnimalLifeSpan.toDouble(),
-                avgChildren
-            )
+        val rowDataInst = RowData(
+            this.numberOfDayLame,
+            this.animals.size,
+            this.grassAmount,
+            avgLivingEnergy.toDouble(),
+            avgDeadAnimalLifeSpan.toDouble(),
+            avgChildren
         )
+
+        dataList.add(rowDataInst)
+        tableList.add(rowDataInst)
 
     }
 
     @OptIn(ExperimentalGraphicsApi::class)
     @Composable
-    fun getView(engine: IEngine) {
-        Text("Grass:  ${grassAmountMS.value}")
-        Text("Animals: ${animalsAmountMS.value}")
-        Text("Avg of dead animal lifespan: ${avgDeadLifeSpanMS.value}")
-        Text("Avg of living animals' energy: ${avgLivingEnergyMS.value}")
-        Text("Avg of living animals' children: ${avgNumberOfChildrenMS.value}")
-        Text("Dead by today: ${amountOfDeadAnimalsMS.value}")
-        Text("Today: ${numberOfDay.value}")
-        if (maxGenotypeMS.value != "") {
-            Text("Max genotype: \n ${maxGenotypeMS.value}")
-            Text("Max genotype amount: ${maxGenotypeAmountMS.value}")
-        }
+    fun getStaticView(engine: IEngine) {
+
         if (engine is MagicEngine) {
-            if (engine.rescueTimes != engine.counter)
-                Text("Pozostało: ${engine.rescueTimes - engine.counter} ratunków")
+            if (engine.rescueTimes != engine.counter.value)
+                Text("Pozostało: ${engine.rescueTimes - engine.counter.value} ratunków")
             else
                 Text("Wykorzystano wszystkie ratunki")
         }
-        if (trackedAnimal != null) {
+
+        if (this.isAnimalTracked.value) {
             Surface(color = Color.hsl(250.0F, 0.37F, 0.5F, 1.0F)) {
                 Column {
                     Text("Tracked animal statistics")
@@ -150,6 +131,48 @@ class Statistics {
                     }
                 }
             }
+        } else {
+            Text("Żaden animal nie jets trackowany")
+        }
+
+        Text(this.genotypeStringMS.value)
+
+        Text(
+            "Legenda:\n" +
+                    "- Numer epoki\n" +
+                    "- Ilość żywych zwierząt\n" +
+                    "- Ilość trawy na mapie\n" +
+                    "- Średnia ilość żyjących zwierząt\n" +
+                    "- Średnia długość życia do śmierci\n" +
+                    "- Średnia ilość dzieci\n"
+        )
+    }
+
+    @OptIn(ExperimentalGraphicsApi::class)
+    @Composable
+    fun getTableView() {
+        val scrollbarState = rememberLazyListState()
+        Box {
+
+            val column2Weight = 1.0f / 6.0f // 100%/6
+            LazyColumn(Modifier.fillMaxWidth().fillMaxHeight(), state = scrollbarState) {
+                items(tableList.size) { index ->
+                    val data = tableList[tableList.size - 1 - index]
+                    Row(Modifier.fillMaxWidth().height(20.dp)) {
+                        Text(data.day.toString(), modifier = Modifier.weight(column2Weight))
+                        Text(data.animalsAmount.toString(), modifier = Modifier.weight(column2Weight))
+                        Text(data.grassAmount.toString(), modifier = Modifier.weight(column2Weight))
+                        Text(data.avgEnergy.round(2).toString(), modifier = Modifier.weight(column2Weight))
+                        Text(data.avgDeadLifeSpan.round(2).toString(), modifier = Modifier.weight(column2Weight))
+                        Text(data.avgLivingChild.round(2).toString(), modifier = Modifier.weight(column2Weight))
+                    }
+                }
+            }
+
+            VerticalScrollbar(
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                adapter = rememberScrollbarAdapter(scrollbarState)
+            )
         }
     }
 
@@ -173,23 +196,23 @@ class Statistics {
             } else {
                 0.0
             }
-        this.avgNumberOfChildrenMS.value = this.avgChildren
     }
 
-    private fun calcGenotypes() {
-        val genotypeMap = mutableMapOf<Array<Int>, Int>()
+    private fun calcGenotypes(): Pair<String, Int> {
+        val genotypeMap = mutableMapOf<String, Pair<Array<Int>, Int>>()
         animals.forEach {
-            genotypeMap.putIfAbsent(it.genes, 0)
-            genotypeMap[it.genes] = genotypeMap[it.genes]!! + 1
+            val key = it.genes.contentDeepToString()
+            genotypeMap.putIfAbsent(key, it.genes to 0)
+            genotypeMap[key] = genotypeMap[key]!!.component1() to genotypeMap[key]!!.component2() + 1
         }
-        var (maxGenotype, maxAmount) = Pair("", 0)
-        val mapEntry = genotypeMap.maxByOrNull { it.value }
-        if (mapEntry != null && mapEntry.component2() > 1) {
-            maxGenotype = mapEntry.component1().toString()
-            maxAmount = mapEntry.component2()
+        var (maxGenotype, maxAmount) = Pair("-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-", 0)
+        val mapEntry = genotypeMap.maxByOrNull { it.value.component2() }
+        if (mapEntry != null && mapEntry.component2().component2() > 1) {
+            maxGenotype = mapEntry.component1().replace(" ", "")
+            maxGenotype = maxGenotype.replace("[", "").replace("]", "")
+            maxAmount = mapEntry.component2().component2()
         }
-        this.maxGenotypeMS.value = maxGenotype
-        this.maxGenotypeAmountMS.value = maxAmount
+        return maxGenotype to maxAmount
     }
 
     private fun calcAvgLivingAnimalEnergy(): Long {
@@ -198,7 +221,6 @@ class Statistics {
         } else {
             0L
         }
-        this.avgLivingEnergyMS.value = avgLivingEnergy
         return avgLivingEnergy
     }
 
@@ -209,7 +231,6 @@ class Statistics {
             } else {
                 0L
             }
-        this.avgDeadLifeSpanMS.value = avgDeadAnimalLifeSpan
         return avgDeadAnimalLifeSpan
     }
 }
