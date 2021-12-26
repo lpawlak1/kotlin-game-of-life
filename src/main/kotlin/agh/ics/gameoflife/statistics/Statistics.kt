@@ -162,7 +162,7 @@ class Statistics {
         Box {
 
             val column2Weight = 1.0f / 6.0f // 100%/6
-            LazyColumn(Modifier.fillMaxWidth().fillMaxHeight(0.97f), state = scrollbarState) {
+            LazyColumn(Modifier.fillMaxWidth().defaultMinSize(minHeight = 400.dp).fillMaxHeight(0.7f), state = scrollbarState) {
                 items(tableList.size) { index ->
                     val data = tableList[tableList.size - 1 - index]
                     Row(Modifier.fillMaxWidth().height(20.dp)) {
@@ -204,19 +204,21 @@ class Statistics {
         }
 
     private fun calcGenotypes(): String {
-        val genotypeMap = mutableMapOf<String, Pair<Array<Int>, Int>>()
+        val genotypeMap = mutableMapOf<String, Int>()
         animals.forEach {
             val key = it.genes.contentDeepToString()
-            genotypeMap.putIfAbsent(key, it.genes to 0)
-            genotypeMap[key] = genotypeMap[key]!!.component1() to genotypeMap[key]!!.component2() + 1
+            genotypeMap.putIfAbsent(key, 0)
+            genotypeMap[key] = genotypeMap[key]!! + 1
         }
-        var maxGenotype = "-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-"
-        val mapEntry = genotypeMap.maxByOrNull { it.value.component2() }
-        if (mapEntry != null && mapEntry.component2().component2() > 1) {
-            maxGenotype = mapEntry.component1().replace(" ", "")
-            maxGenotype = maxGenotype.replace("[", "").replace("]", "")
+        val mapEntry = genotypeMap.maxByOrNull { it.value }
+        if (mapEntry == null || mapEntry.component2() <= 1) {
+            return "-"
         }
-        return maxGenotype
+        return mapEntry
+            .component1()
+            .replace(" ", "")
+            .replace("[", "")
+            .replace("]", "")
     }
 
     private fun calcAvgLivingAnimalEnergy(): Long =

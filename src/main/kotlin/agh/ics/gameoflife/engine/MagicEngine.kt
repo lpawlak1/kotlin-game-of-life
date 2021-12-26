@@ -23,7 +23,7 @@ class MagicEngine(
 
     override fun runIteration() {
         super.runIteration()
-        if (map.lenAnimals == 5 && counter.value < rescueTimes) {
+        if (map.lenAnimals == 5 && counter.value <= rescueTimes) {
             val toAdd = mutableListOf<Animal>()
             if (this.map is AbstractWorldMap) {
                 this.map.statistics.animals.forEach {

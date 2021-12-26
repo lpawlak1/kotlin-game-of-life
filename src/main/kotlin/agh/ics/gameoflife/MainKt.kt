@@ -49,7 +49,7 @@ fun runSimulation(running: MutableState<Boolean>, time: MutableState<Int>, engin
         this.append(".csv")
     }
 
-    sleep(50)
+    sleep(100)
 
     while (true) {
         sleep(time.value.toLong())
@@ -122,10 +122,9 @@ fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolea
     val squareView = SquareView.views()
 
     MaterialTheme {
-        Column {
-            statistics.getStaticView()
+        Column(modifier = Modifier.fillMaxHeight(0.9f)) {
             Row(
-                modifier = Modifier.padding(5.dp).border(3.dp, Color.Black),
+                modifier = Modifier.padding(5.dp).border(3.dp, Color.Black).fillMaxHeight(0.8f),
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(5.dp)
             ) {
@@ -143,6 +142,7 @@ fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolea
                     statistics.getTableView()
                 }
             }
+            statistics.getStaticView()
         }
     }
 }
