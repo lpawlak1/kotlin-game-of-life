@@ -1,5 +1,3 @@
-@file:Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-
 package agh.ics.gameoflife
 
 import agh.ics.gameoflife.engine.IEngine
@@ -15,7 +13,6 @@ import agh.ics.gameoflife.statistics.Statistics
 import agh.ics.gameoflife.view.GridCell
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
@@ -26,11 +23,12 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.rememberWindowState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -49,7 +47,7 @@ fun runSimulation(running: MutableState<Boolean>, time: MutableState<Int>, engin
         this.append(".csv")
     }
 
-    sleep(100)
+    sleep(300)
 
     while (true) {
         sleep(time.value.toLong())
@@ -69,16 +67,18 @@ fun runSimulation(running: MutableState<Boolean>, time: MutableState<Int>, engin
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun getGridView(engine: IEngine, opts: Options, squareView: Map<String, Painter>, running: MutableState<Boolean>) {
+    val height = opts.height+1
+    val width = opts.width+1
+    val maxWidth = 350.0f
     Column(
-        modifier = Modifier.size(((opts.height + 1) * 30).dp),
+        modifier = Modifier.size(maxWidth.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     )
     {
-        val siz2 = opts.width + 1
-        LazyVerticalGrid(cells = GridCells.Fixed(siz2)) {
-            items(siz2 * (opts.height + 1)) {
-                val position = Vector2d(it % siz2, it / siz2)
+        LazyVerticalGrid(cells = GridCells.Fixed(width)) {
+            items(width*height) {
+                val position = Vector2d(it % width, it / width)
                 val a = GridCell(
                     engine.map.getViewObj(position),
                     engine.map.statistics,
@@ -122,15 +122,14 @@ fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolea
     val squareView = SquareView.views()
 
     MaterialTheme {
-        Column(modifier = Modifier.fillMaxHeight(0.9f)) {
+        Column(modifier = Modifier.padding(3.dp)) {
             Row(
-                modifier = Modifier.padding(5.dp).border(3.dp, Color.Black).fillMaxHeight(0.8f),
+                modifier = Modifier.height(350.dp),
                 verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
             ) {
                 Column {
                     getGridView(engine, opts, squareView, running)
-                    statistics.getLeftStatisticsView(engine)
                 }
                 Column {
                     Button(
@@ -142,7 +141,7 @@ fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolea
                     statistics.getTableView()
                 }
             }
-            statistics.getStaticView()
+            statistics.getStaticView(engine)
         }
     }
 }
@@ -150,9 +149,9 @@ fun getMainView(running: MutableState<Boolean>, opts: Options, isWrapped: Boolea
 @Preview
 @Composable
 fun timeSlider(timeValue: MutableState<Int>){
-    val sliderPosition = remember { mutableStateOf(0.0f) }
-    Column{
-        Text("${timeValue.value}", modifier = Modifier.align(Alignment.Start))
+    val sliderPosition = remember { mutableStateOf(0.5f) }
+    Column(modifier = Modifier.height(40.dp), horizontalAlignment = Alignment.CenterHorizontally){
+        Text("${timeValue.value}ms delay")
         Slider(sliderPosition.value,{
             timeValue.value = calculateTime(it)
             sliderPosition.value = it
@@ -199,9 +198,16 @@ fun run(opts: List<Options>) {
 
 @Composable
 private fun MyWindow(state: () -> Unit, running: MutableState<Boolean>, opts: Options, isWrapped: Boolean) =
-    Window(onCloseRequest = state, title = if (isWrapped) "Wrapped map" else "Walled map") {
-        Column{
-            val sleepTime = remember{mutableStateOf(calculateTime(0.0f))}
+    Window(onCloseRequest = state,
+        title = if (isWrapped) "Wrapped map" else "Walled map",
+        state = rememberWindowState(
+            position = WindowPosition(alignment = if (isWrapped) Alignment.TopStart else Alignment.TopEnd),
+            height = 600.dp,
+            width = 800.dp
+        )
+    ) {
+        Column {
+            val sleepTime = remember{mutableStateOf(calculateTime(0.5f))}
             getMainView(running, opts, isWrapped, sleepTime)
             timeSlider(sleepTime)
         }

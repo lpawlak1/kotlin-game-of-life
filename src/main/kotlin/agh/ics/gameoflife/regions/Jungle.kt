@@ -23,7 +23,7 @@ class Jungle(
     }
 
     override fun retColor(): Color {
-        return Color(255, 175, 104, 255)
+        return Color(41, 117, 26, 255)
     }
 
     operator fun contains(position: Vector2d): Boolean {

@@ -29,7 +29,7 @@ class Stepee(
     }
 
     override fun retColor(): Color {
-        return Color(157, 66, 21, 255)
+        return Color(255, 175, 104, 255)
     }
 
     operator fun contains(vec: Vector2d): Boolean {

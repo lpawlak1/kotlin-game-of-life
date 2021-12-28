@@ -4,17 +4,15 @@ import agh.ics.gameoflife.statistics.Options
 import agh.ics.gameoflife.view.InputField
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material.Button
-import androidx.compose.material.Checkbox
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
@@ -28,12 +26,12 @@ class EntryView {
     var options: Options = Options.Default
 
     private val inputMap = hashMapOf(
-        "width" to InputField(intRegex, "Width: ", { it.toInt() < 100 }, "be 0<x<100 and an Integer", options.width),
+        "width" to InputField(intRegex, "Width: ", { it.toInt() < 100 }, "0<x<100 and an Integer", options.width),
         "height" to InputField(intRegex, "Height: ", { it.toInt() < 100 }, "0<x<100 and an Integer", options.height),
-        "startEnergy" to InputField(intRegex, "Start energy: ", { true }, "Integer", options.startEnergy),
-        "moveEnergy" to InputField(intRegex, "Move energy: ", { true }, "Integer", options.moveEnergy),
+        "startEnergy" to InputField(intRegex, "Start energy: ", { true }, "an Integer", options.startEnergy),
+        "moveEnergy" to InputField(intRegex, "Move energy: ", { true }, " an Integer", options.moveEnergy),
         "plantEnergy" to InputField(intRegex, "Plant energy: ", { true }, "an Integer", options.plantEnergy),
-        "jungleRatio" to InputField(jungleRatioRegex, "Jungle ratio: ", { it.toDouble() < 1.00 }, "0<x<1 and an Double with .", options.jungleRatio)
+        "jungleRatio" to InputField(jungleRatioRegex, "Jungle ratio: ", { it.toDouble() < 1.00 }, "0<x<1 and an Double with '.' in it", options.jungleRatio)
     )
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -52,7 +50,9 @@ class EntryView {
                     remember { mutableStateOf(this.isMagicEngine) }
                 )
             }
-            Column {
+            Column(modifier = Modifier.padding(10.dp).fillMaxWidth().fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
+
+                Text("Enter simulation parameters", style = MaterialTheme.typography.h4)
 
                 for (inputField in inputMap.values) {
                     inputField.getView()
@@ -62,9 +62,10 @@ class EntryView {
                     Row {
                         Checkbox(
                             checked = checkedStateValue.value,
-                            onCheckedChange = { checkedStateValue.value = it }
+                            onCheckedChange = { checkedStateValue.value = it },
+                            colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary),
                         )
-                        Text("Czy silnik mapy nr ${index + 1} ma być magiczny?")
+                        Text("Does engine ${index+1} should be magical?", modifier = Modifier.align(Alignment.CenterVertically))
                     }
                 }
 
@@ -85,9 +86,9 @@ class EntryView {
                     }
                 }) {
                     if (inputMap.values.all { it.noErrors.value }) {
-                        Text("Dalej")
+                        Text("Next")
                     } else {
-                        Text("Plis popraw błędy")
+                        Text("Please correct the mistakes")
                     }
                 }
 
@@ -110,9 +111,11 @@ fun main() =
         if (!nextShown.value) {
             Window(
                 onCloseRequest = ::exitApplication,
-                title = "Enter entry values",
+                title = "Life simulations ~ lpawlak",
                 state = rememberWindowState(
                     position = WindowPosition(alignment = Alignment.Center),
+                    height = 750.dp,
+                    width = 500.dp
                 )
             ) {
                 entryView.getView(nextShown, optsList)

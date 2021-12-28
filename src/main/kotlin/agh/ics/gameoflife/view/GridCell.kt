@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -40,12 +41,12 @@ class GridCell(
         Surface(color = background) {
             if (topObject.value.classed is Animal) {
                 if (running.value) {
-                    getAnimalImage(painters[topObject.value.getName()]!!)
+                    getAnimalImage(painters[topObject.value.getName()]!!, topObject.value.classed as Animal)
                 } else {
                     TooltipArea(tooltip = {
                         Surface(
-                            color = Color.hsl(164.0F, 0.53F, 0.5F, 1.0F),
-                            shape = RoundedCornerShape(5),
+                            color = MaterialTheme.colors.secondaryVariant,
+                            shape = RoundedCornerShape(3),
                             modifier = Modifier.padding(20.dp)
                         ) {
                             val animal = topObject.value.classed as Animal
@@ -73,7 +74,7 @@ class GridCell(
                             }
                         }
                     }) {
-                        getAnimalImage(painters[topObject.value.getName()]!!)
+                        getAnimalImage(painters[topObject.value.getName()]!!, topObject.value.classed as Animal)
                     }
                 }
             } else {
@@ -85,7 +86,7 @@ class GridCell(
 
     @OptIn(ExperimentalGraphicsApi::class)
     @Composable
-    private fun getAnimalImage(painter: Painter) {
+    private fun getAnimalImage(painter: Painter, animal: Animal) {
         Image(
             painter = painter,
             "",
@@ -93,13 +94,13 @@ class GridCell(
                 Color.hsl(
                     0.0F,
                     max(
-                        min(1.0F, ((topObject.value.classed as Animal).energy.toFloat() / 100.0F)),
+                        min(1.0F, (animal.energy.toFloat() / 100.0F)),
                         0.1F
                     ), 0.5F
                 )
             ),
             modifier = Modifier.fillMaxSize()
-                .graphicsLayer(rotationZ = 45.0F * (topObject.value.classed as Animal).direction.`val`)
+                .graphicsLayer(rotationZ = 45.0F * animal.direction.`val`)
         )
     }
 }

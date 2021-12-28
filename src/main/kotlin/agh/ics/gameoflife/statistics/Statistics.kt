@@ -4,21 +4,22 @@ import agh.ics.gameoflife.elements.Animal
 import agh.ics.gameoflife.engine.IEngine
 import agh.ics.gameoflife.engine.MagicEngine
 import agh.ics.gameoflife.map.IWorldMap
+import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 
-@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 class Statistics {
     private lateinit var isAnimalTracked: MutableState<Boolean>
     lateinit var map: IWorldMap
@@ -111,48 +112,39 @@ class Statistics {
 
     @OptIn(ExperimentalGraphicsApi::class)
     @Composable
-    fun getStaticView() {
+    fun getStaticView(engine: IEngine) {
         if (this.isAnimalTracked.value) {
-            Surface(color = Color.hsl(250.0F, 0.37F, 0.5F, 1.0F)) {
+            Surface(color = MaterialTheme.colors.secondaryVariant) {
                 Column {
                     Text("Tracked animal statistics")
-                    Text("Children amount ${trackedAnimalChildrenMS.value}")
-                    Text("Ancestors amount ${trackedAnimalAncestorsMS.value}")
+                    Text("Children amount: ${trackedAnimalChildrenMS.value}")
+                    Text("Descendant amount: ${trackedAnimalAncestorsMS.value}")
                     if (trackedAnimal!!.energy <= 0) {
                         Text("Death date: ${trackedAnimalDeathDateMS.value}")
                         Text("Lifespan: ${trackedAnimalLifeSpanMS.value}")
+                    }else{
+                        Text("")
+                        Text("")
                     }
                 }
             }
         } else {
-            Text("Żaden animal nie jets obserwowany")
+            Text("No animal is being tracked\n\n\n\n", style = TextStyle(MaterialTheme.colors.error))
         }
 
-        if (this.genotypeStringMS.value != "") {
-            Text("Dominanta z genotypu:")
+        if (this.genotypeStringMS.value != "-") {
+            Text("Dominant from the genotype: ")
             Text(this.genotypeStringMS.value)
+        } else {
+            Text("No dominant genotype found.\n", style = TextStyle(MaterialTheme.colors.error))
         }
-    }
 
-    @OptIn(ExperimentalGraphicsApi::class)
-    @Composable
-    fun getLeftStatisticsView(engine: IEngine) {
         if (engine is MagicEngine) {
             if (engine.rescueTimes != engine.counter.value)
-                Text("Pozostało: ${engine.rescueTimes - engine.counter.value} ratunków")
+                Text("${engine.rescueTimes - engine.counter.value} rescues remaining")
             else
-                Text("Wykorzystano wszystkie ratunki")
+                Text("All rescues used")
         }
-        Text(
-            "Legenda tabeli:\n" +
-                    "- Numer epoki\n" +
-                    "- Ilość żywych zwierząt\n" +
-                    "- Ilość trawy na mapie\n" +
-                    "- Średnia ilość żyjących zwierząt\n" +
-                    "- Średnia długość życia do śmierci\n" +
-                    "- Średnia ilość dzieci\n"
-        )
-
     }
 
     @OptIn(ExperimentalGraphicsApi::class)
@@ -160,20 +152,34 @@ class Statistics {
     fun getTableView() {
         val scrollbarState = rememberLazyListState()
         Box {
-
-            val column2Weight = 1.0f / 6.0f // 100%/6
-            LazyColumn(Modifier.fillMaxWidth().defaultMinSize(minHeight = 400.dp).fillMaxHeight(0.7f), state = scrollbarState) {
-                items(tableList.size) { index ->
-                    val data = tableList[tableList.size - 1 - index]
-                    Row(Modifier.fillMaxWidth().height(20.dp)) {
-                        Text(data.day.toString(), modifier = Modifier.weight(column2Weight))
-                        Text(data.animalsAmount.toString(), modifier = Modifier.weight(column2Weight))
-                        Text(data.grassAmount.toString(), modifier = Modifier.weight(column2Weight))
-                        Text(data.avgEnergy.round(2).toString(), modifier = Modifier.weight(column2Weight))
-                        Text(data.avgDeadLifeSpan.round(2).toString(), modifier = Modifier.weight(column2Weight))
-                        Text(data.avgLivingChild.round(2).toString(), modifier = Modifier.weight(column2Weight))
+            TooltipArea(tooltip = {
+                Surface(color = MaterialTheme.colors.secondaryVariant, modifier = Modifier.padding(5.dp)) {
+                    Text(
+                        "Table legend:\n" +
+                                "- Epoch number\n" +
+                                "- Living animals count\n" +
+                                "- Grass count\n" +
+                                "- Average living animals\n" +
+                                "- Average lifespan of dead animals\n" +
+                                "- Average amount of children\n"
+                    )
+                }
+            }){
+                val column2Weight = 1.0f / 6.0f // 100%/6
+                LazyColumn(Modifier.fillMaxWidth().height(350.dp), state = scrollbarState) {
+                    items(kotlin.math.min(tableList.size, 30)) { index ->
+                        val data = tableList[tableList.size - 1 - index]
+                        Row(Modifier.fillMaxWidth().height(20.dp)) {
+                            Text(data.day.toString(), modifier = Modifier.weight(column2Weight))
+                            Text(data.animalsAmount.toString(), modifier = Modifier.weight(column2Weight))
+                            Text(data.grassAmount.toString(), modifier = Modifier.weight(column2Weight))
+                            Text(data.avgEnergy.round(2).toString(), modifier = Modifier.weight(column2Weight))
+                            Text(data.avgDeadLifeSpan.round(2).toString(), modifier = Modifier.weight(column2Weight))
+                            Text(data.avgLivingChild.round(2).toString(), modifier = Modifier.weight(column2Weight))
+                        }
                     }
                 }
+
             }
 
             VerticalScrollbar(
